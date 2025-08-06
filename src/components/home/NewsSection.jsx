@@ -1,9 +1,44 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import newsData from "../data/newsData";
+import axios from "axios";
 
 export default function NewsSection() {
-  const mainNews = newsData[0];
-  const rightNews = newsData.slice(1, 6); // 5 berita untuk kanan
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        // const res = await axios.get("http://localhost:3000/news");
+        // setNews(res.data);
+      } catch (err) {
+        console.error("Failed to fetch news:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="bg-[#292F36] text-white py-12 px-6 text-center">
+        <p className="text-xl">Loading news...</p>
+      </section>
+    );
+  }
+
+  if (!news.length) {
+    return (
+      <section className="bg-[#292F36] text-white py-12 px-6 text-center">
+        <p className="text-xl">No news available.</p>
+      </section>
+    );
+  }
+
+  const mainNews = news[0];
+  const rightNews = news.slice(1, 6);
 
   return (
     <section className="bg-[#292F36] text-white py-12 px-6">
@@ -52,8 +87,6 @@ export default function NewsSection() {
           ))}
         </div>
       </div>
-
-     
     </section>
   );
 }

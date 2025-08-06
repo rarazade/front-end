@@ -1,28 +1,79 @@
-
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import About from "./pages/About";
-import Games from "./pages/Games";
-import GameDetail from "./pages/GameDetail";
-import SectionGamePage from "./pages/SectionGamepage";
-import NewsPage from "./pages/NewsPage";
-import NewsDetail from "./pages/NewsDetail";
-
+import Games from "./pages/Games/Games";
+import GameDetail from "./pages/Games/GameDetail";
+import NewsPage from "./pages/News/NewsPage";
+import NewsDetail from "./pages/News/NewsDetail";
+import Navbar from "./components/common/Navbar";
+import Footer from "./components/common/Footer";
+import BackToTopButton from "./components/common/BackToTopButton";
+import AdminLogin from "./pages/Admin/AdminLogin";
+import PrivateRoute from "./routes/PrivateRoute";
+import AdminDashboard from './pages/Admin/AdminDashboard';
+import AddGame from "./pages/Admin/AddGame";
+import AddNews from "./pages/Admin/AddNews";
+import AddCategory from "./pages/Admin/AddCategory";
 
 export default function App() {
-  return (
-    <>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/games" element={<Games />} />
-        <Route path="/games/:id" element={<GameDetail />} />
-        <Route path="/games/platform/:platform" element={<SectionGamePage />} />
-        <Route path="/games/category/:category" element={<SectionGamePage />} />
-        <Route path="/news" element={<NewsPage />} />
-        <Route path="/news/:id" element={<NewsDetail />} />
+  const location = useLocation();
 
-      </Routes>
-    </>
+  // Hilangkan Navbar & Footer di semua halaman admin, kecuali halaman login
+  const isAdminPage = location.pathname.startsWith("/admin") && location.pathname !== "/admin/login";
+
+  return (
+    <div className="flex flex-col min-h-screen bg-[#1f242b] text-white">
+      {!isAdminPage && <Navbar />}
+
+      <main className="flex-grow">
+        <Routes>
+          {/* PUBLIC ROUTES */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/games" element={<Games />} />
+          <Route path="/games/:id" element={<GameDetail />} />
+          <Route path="/news" element={<NewsPage />} />
+          <Route path="/news/:id" element={<NewsDetail />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+
+          {/* ADMIN ROUTES (via PrivateRoute) */}
+          <Route
+            path="/admin/dashboard"
+            element={
+              <PrivateRoute>
+                <AdminDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/add-game"
+            element={
+              <PrivateRoute>
+                <AddGame />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/add-news"
+            element={
+              <PrivateRoute>
+                <AddNews />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/add-category"
+            element={
+              <PrivateRoute>
+                <AddCategory />
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </main>
+
+      {!isAdminPage && <Footer />}
+      {!isAdminPage && <BackToTopButton />}
+    </div>
   );
 }

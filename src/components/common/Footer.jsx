@@ -1,4 +1,3 @@
-import mainImage from "../assets/Draft_Design3.webp";
 import { FaFacebookF, FaYoutube, FaXTwitter } from "react-icons/fa6";
 
 export default function Footer() {
