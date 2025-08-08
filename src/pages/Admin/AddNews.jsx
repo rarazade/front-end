@@ -1,66 +1,61 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const AdminAddNews = () => {
+const AddNews = () => {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
-  const [image, setImage] = useState(null);
-  const [error, setError] = useState("");
+  const [img, setImage] = useState(null);
   const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false); // ✅
 
-  const imageInputRef = useRef(null);
   const navigate = useNavigate();
+  const imageRef = useRef(null);
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file && !file.type.startsWith("image/")) {
-      setError("File harus berupa gambar!");
-      return;
-    }
-    setError("");
-    setImage(file);
+    setImage(e.target.files[0]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
+
+    if (!title || !date || !excerpt || !content || !img) {
+      setError("Semua field wajib diisi.");
+      setSuccess("");
+      return;
+    }
+
+    setIsSubmitting(true); // ✅ Disable tombol saat submit
+
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("date", date);
+    formData.append("excerpt", excerpt);
+    formData.append("content", content);
+    formData.append("img", img); // ✅ sesuai backend
 
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Anda belum login sebagai admin.");
-      }
 
-      const formData = new FormData();
-      formData.append("title", title);
-      formData.append("date", date);
-      formData.append("excerpt", excerpt);
-      formData.append("content", content);
-      formData.append("image", image);
-
-      const res = await fetch("http://localhost:3000/api/news", {
-        method: "POST",
+      await axios.post("http://localhost:3000/api/news", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
-        body: formData,
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Gagal menambahkan berita");
-
-      setSuccess("Berita berhasil ditambahkan!");
-      setTitle("");
-      setDate("");
-      setExcerpt("");
-      setContent("");
-      setImage(null);
-      imageInputRef.current.value = ""; // reset file input
+      setSuccess("Berita berhasil dibuat.");
+      setError("");
+      setTimeout(() => navigate("/admin/dashboard"), 1500);
     } catch (err) {
-      setError(err.message);
+      console.error("Gagal membuat berita:", err);
+      setError("Gagal membuat berita.");
+      setSuccess("");
+    } finally {
+      setIsSubmitting(false); // ✅ Aktifkan tombol kembali
     }
   };
 
@@ -93,36 +88,39 @@ const AdminAddNews = () => {
           required
         />
 
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="w-full p-2 rounded bg-[#292F36] text-white border border-gray-400"
-          required
-        />
+        <div>
+          <label className="block font-semibold mb-1">Tanggal Publikasi:</label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="w-full p-2 rounded bg-[#292F36] text-white border border-gray-400"
+            required
+          />
+        </div>
 
         <textarea
-          placeholder="Excerpt (ringkasan berita)"
+          placeholder="Ringkasan Berita"
           value={excerpt}
           onChange={(e) => setExcerpt(e.target.value)}
           className="w-full p-2 rounded bg-[#292F36] text-white border border-gray-400"
-          rows={2}
+          rows="2"
           required
         />
 
         <textarea
-          placeholder="Konten lengkap berita"
+          placeholder="Isi Lengkap Berita"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           className="w-full p-2 rounded bg-[#292F36] text-white border border-gray-400"
-          rows={6}
+          rows="6"
           required
         />
 
         <div>
           <label className="block font-semibold mb-1">Gambar Utama:</label>
           <input
-            ref={imageInputRef}
+            ref={imageRef}
             type="file"
             accept="image/*"
             onChange={handleImageChange}
@@ -133,13 +131,14 @@ const AdminAddNews = () => {
 
         <button
           type="submit"
+          disabled={isSubmitting} // ✅ Disable tombol
           className="bg-[#4ECDC4] text-black font-semibold py-2 px-6 rounded hover:bg-[#3fb8b3]"
         >
-          Simpan
+          {isSubmitting ? "Menyimpan..." : "Simpan"}
         </button>
       </form>
     </div>
   );
 };
 
-export default AdminAddNews;
+export default AddNews;

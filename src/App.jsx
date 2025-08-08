@@ -14,6 +14,8 @@ import AdminDashboard from './pages/Admin/AdminDashboard';
 import AddGame from "./pages/Admin/AddGame";
 import AddNews from "./pages/Admin/AddNews";
 import AddCategory from "./pages/Admin/AddCategory";
+import EditGame from "./pages/Admin/EditGame";
+import EditNews from "./pages/Admin/EditNews";
 
 export default function App() {
   const location = useLocation();
@@ -38,37 +40,21 @@ export default function App() {
 
           {/* ADMIN ROUTES (via PrivateRoute) */}
           <Route
-            path="/admin/dashboard"
-            element={
-              <PrivateRoute>
-                <AdminDashboard />
-              </PrivateRoute>
-            }
+            path="/admin/dashboard"element={<PrivateRoute><AdminDashboard /></PrivateRoute>}
           />
           <Route
-            path="/admin/add-game"
-            element={
-              <PrivateRoute>
-                <AddGame />
-              </PrivateRoute>
-            }
+            path="/admin/add-game"element={<PrivateRoute><AddGame /></PrivateRoute>}
           />
           <Route
-            path="/admin/add-news"
-            element={
-              <PrivateRoute>
-                <AddNews />
-              </PrivateRoute>
-            }
+            path="/admin/add-news"element={<PrivateRoute><AddNews /></PrivateRoute>}
           />
           <Route
-            path="/admin/add-category"
-            element={
-              <PrivateRoute>
-                <AddCategory />
-              </PrivateRoute>
-            }
+            path="/admin/add-category"element={<PrivateRoute><AddCategory /></PrivateRoute>}
           />
+         <Route path="/admin/edit-game/:id" element={<EditGame />} />
+         <Route path="/admin/edit-news/:id" element={<EditNews />} />
+
+
         </Routes>
       </main>
 

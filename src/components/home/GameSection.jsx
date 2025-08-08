@@ -14,12 +14,11 @@ export default function GameSection() {
         const response = await axios.get("http://localhost:3000/api/games");
         const games = response.data;
 
-        // Kelompokkan berdasarkan platform
         const grouped = {
           PC: games.filter((game) => game.platforms[0] === "PC").slice(0, 2),
           Mobile: games.filter((game) => game.platforms[0] === "Mobile").slice(0, 2),
         };
-        console.log(`http://localhost:3000/${games[0].img}`)
+
         setGamesByPlatform(grouped);
       } catch (error) {
         console.error("Gagal fetch data game:", error);
@@ -51,7 +50,7 @@ export default function GameSection() {
                   className="relative group w-60 h-60 overflow-hidden rounded-lg border-4 border-[#4ECDC4] shadow-md"
                 >
                   <img
-                    src={game.img}
+                    src={`http://localhost:3000/uploads/${game.img}`}
                     alt={game.title}
                     className="w-full h-full object-cover transform duration-300 group-hover:scale-110"
                   />

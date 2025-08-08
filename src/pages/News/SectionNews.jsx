@@ -9,12 +9,12 @@ export default function SectionNews() {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const res = await fetch("http://localhost:3000/news");
+        const res = await fetch("http://localhost:3000/api/news");
         const data = await res.json();
         setNewsData(data);
-        setLoading(false);
       } catch (error) {
         console.error("Failed to fetch news:", error);
+      } finally {
         setLoading(false);
       }
     };
@@ -53,13 +53,18 @@ export default function SectionNews() {
 
         {/* Berita utama */}
         <div className="mb-12 bg-[#292F36] p-6 rounded-2xl border border-gray-600 shadow-xl transition">
+          <div className="mt-6 w-full h-[400px] rounded overflow-hidden">
           <img
-            src={newsData[0].image}
+            src={`http://localhost:3000/uploads/${newsData[0].image}`}
             alt={newsData[0].title}
             className="w-full h-[400px] object-cover rounded-lg mb-4"
           />
+          </div>
+
           <h3 className="text-2xl font-bold mb-2">{newsData[0].title}</h3>
-          <p className="mb-2 text-sm text-gray-300">{newsData[0].createdAt?.slice(0, 10)}</p>
+          <p className="mb-2 text-sm text-gray-300">
+            {newsData[0].createdAt ? newsData[0].createdAt.slice(0, 10) : ""}
+          </p>
           <p className="mb-4">{newsData[0].excerpt}</p>
           <Link
             to={`/news/${newsData[0].id}`}
@@ -82,7 +87,9 @@ export default function SectionNews() {
                 <h3 className="text-xl font-bold mb-1">{item.title}</h3>
                 <p className="text-sm text-cyan-400">
                   {item.source || "WGG Studio"}
-                  <span className="text-gray-400 ml-2">{item.createdAt?.slice(0, 10)}</span>
+                  <span className="text-gray-400 ml-2">
+                    {item.createdAt ? item.createdAt.slice(0, 10) : ""}
+                  </span>
                 </p>
                 <p className="text-sm mt-3">{item.excerpt}</p>
                 <p className="text-sm mt-2 text-gray-400">{item.fullText}</p>
@@ -96,12 +103,13 @@ export default function SectionNews() {
               </div>
 
               {/* Image section */}
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 mt-6 w-[260] h-[200px] rounded overflow-hidden">
                 <img
-                  src={item.image}
+                  src={`http://localhost:3000/uploads/${item.image}`}
                   alt={item.title}
-                  className="w-full md:w-64 rounded"
+                  className="w-full h-full object-cover"
                 />
+
               </div>
             </div>
           ))}

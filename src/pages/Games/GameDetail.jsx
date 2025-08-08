@@ -1,6 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { FaChevronLeft, FaChevronRight, FaPlay } from "react-icons/fa";
 
 export default function GameDetail() {
   const { id } = useParams();
@@ -8,12 +7,11 @@ export default function GameDetail() {
 
   const [game, setGame] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [currentVideo, setCurrentVideo] = useState(0);
 
   useEffect(() => {
     const fetchGame = async () => {
       try {
-        const res = await fetch(`/api/games/${id}`);
+        const res = await fetch(`http://localhost:3000/api/games/${id}`);
         if (!res.ok) throw new Error("Game not found");
         const data = await res.json();
         setGame(data);
@@ -28,22 +26,8 @@ export default function GameDetail() {
     fetchGame();
   }, [id]);
 
-  if (loading)
-    return <p className="text-white text-center">Loading...</p>;
-  if (!game)
-    return <p className="text-white text-center">Game not found.</p>;
-
-  const prevVideo = () => {
-    setCurrentVideo((prev) =>
-      prev === 0 ? (game.screenshots?.length || 1) - 1 : prev - 1
-    );
-  };
-
-  const nextVideo = () => {
-    setCurrentVideo((prev) =>
-      prev === (game.screenshots?.length || 1) - 1 ? 0 : prev + 1
-    );
-  };
+  if (loading) return <p className="text-white text-center">Loading...</p>;
+  if (!game) return <p className="text-white text-center">Game not found.</p>;
 
   return (
     <section className="bg-[#292F36] text-white min-h-screen py-10 px-4 mt-10">
@@ -69,51 +53,6 @@ export default function GameDetail() {
           </button>
         </div>
 
-        {game.screenshots?.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-bold mb-4 text-white">Video Preview</h2>
-            <div className="relative w-full max-w-3xl mx-auto">
-              <img
-                src={
-                  game.screenshots[currentVideo]
-                    ? game.screenshots[currentVideo]
-                    : "/placeholder.jpg"
-                }
-                alt="Main Preview"
-                className="rounded w-full"
-              />
-              <button className="absolute inset-0 flex justify-center items-center text-white text-4xl">
-                <FaPlay className="bg-white text-black rounded-full p-2" />
-              </button>
-              <button
-                onClick={prevVideo}
-                className="absolute left-0 top-1/2 -translate-y-1/2 px-2 text-white"
-              >
-                <FaChevronLeft />
-              </button>
-              <button
-                onClick={nextVideo}
-                className="absolute right-0 top-1/2 -translate-y-1/2 px-2 text-white"
-              >
-                <FaChevronRight />
-              </button>
-            </div>
-            <div className="flex justify-center gap-2 mt-4">
-              {game.screenshots.map((thumb, index) => (
-                <img
-                  key={index}
-                  src={thumb}
-                  alt={`Thumbnail ${index}`}
-                  onClick={() => setCurrentVideo(index)}
-                  className={`w-24 h-16 rounded cursor-pointer border-2 ${
-                    currentVideo === index ? "border-white" : "border-transparent"
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
         <div>
           <h2 className="text-xl font-semibold mb-2 text-[#4ECDC4]">
             About this game
@@ -123,11 +62,16 @@ export default function GameDetail() {
 
         <ul className="space-y-2 text-gray-400">
           <li>
-            <strong>Platform:</strong> {Array.isArray(game.platforms) ? game.platforms.join(", ") : game.platforms}
+            <strong>Platform:</strong>{" "}
+            {Array.isArray(game.platforms)
+              ? game.platforms.join(", ")
+              : game.platforms}
           </li>
           <li>
             <strong>Category:</strong>{" "}
-            {Array.isArray(game.categories) ? game.categories.join(", ") : game.categories}
+            {Array.isArray(game.categories)
+              ? game.categories.join(", ")
+              : game.categories}
           </li>
           <li>
             <strong>Release Date:</strong> {game.releaseDate}

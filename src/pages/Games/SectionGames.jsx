@@ -17,47 +17,52 @@ export default function SectionGame() {
   const [loading, setLoading] = useState(true);
 
   // Fetch games
-  useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        setLoading(true);
-        const params = new URLSearchParams();
-        if (searchTerm) params.append("search", searchTerm);
-        if (selectedPlatform) params.append("platform", selectedPlatform);
-        if (selectedCategories.length) params.append("category", selectedCategories.join(","));
+ useEffect(() => {
+  const fetchGames = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (searchTerm) params.append("search", searchTerm);
+      if (selectedPlatform) params.append("platform", selectedPlatform);
+      if (selectedCategories.length)
+        params.append("category", selectedCategories.join(",")); // ⬅️ Kirim ID
 
-        const url = `/api/games?${params.toString()}`;
-        const res = await axios.get(url);
-        setGamesData(res.data);
-      } catch (err) {
-        console.error("Error fetching games:", err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+      const url = `http://localhost:3000/api/games?${params.toString()}`;
+      const res = await axios.get(url);
+      setGamesData(res.data);
+    } catch (err) {
+      console.error("Error fetching games:", err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchGames();
-  }, [searchTerm, selectedPlatform, selectedCategories]);
+  fetchGames();
+}, [searchTerm, selectedPlatform, selectedCategories]);
+
 
   // Fetch meta for filters
   useEffect(() => {
-    const fetchMeta = async () => {
-      try {
-        const res = await axios.get("/api/games/meta");
-        setPlatforms(res.data.platforms || []);
-        setCategories(res.data.categories || []);
-      } catch (err) {
-        console.error("Error fetching meta data:", err.message);
-      }
-    };
+  const fetchMeta = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/games/meta");
+      const data = await res.json();
+      console.log("✅ META:", data);
 
-    fetchMeta();
-  }, []);
+      setPlatforms(data.platforms || []);
+      setCategories(data.categories || []);
+    } catch (err) {
+      console.error("❌ Gagal ambil meta:", err.message);
+    }
+  };
+
+  fetchMeta();
+}, []);
 
   const categoryOptions = categories.map((cat) => ({
-    value: typeof cat === "string" ? cat : cat.name,
-    label: typeof cat === "string" ? cat : cat.name,
-  }));
+  value: cat.id,
+  label: cat.name,
+}));
 
   return (
     <section className="bg-[#292F36] text-white py-16 px-6 min-h-screen">
@@ -67,68 +72,72 @@ export default function SectionGame() {
         </h2>
 
         {/* Filters */}
-        <div className="flex flex-col gap-6 md:gap-4 md:flex-row justify-between mb-8">
-          <input
-            type="text"
-            placeholder="Search games..."
-            className="p-2 rounded bg-[#1f242b] text-white w-full md:w-1/3"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+<div className="flex flex-col gap-6 md:gap-4 md:flex-row justify-between mb-8">
+  <input
+    type="text"
+    placeholder="Search games..."
+    className="p-2 rounded bg-[#1f242b] text-white w-full md:w-1/3"
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+  />
 
-          <select
-            className="p-2 rounded bg-[#1f242b] text-white w-full md:w-1/3"
-            value={selectedPlatform}
-            onChange={(e) => setSelectedPlatform(e.target.value)}
-          >
-            <option value="">All Platforms</option>
-            {platforms.map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
-          </select>
+  <select
+    className="p-2 rounded bg-[#1f242b] text-white w-full md:w-1/3"
+    value={selectedPlatform}
+    onChange={(e) => setSelectedPlatform(e.target.value)}
+  >
+    <option value="">All Platforms</option>
+    {platforms.map((p) => (
+      <option key={p} value={p}>
+        {p}
+      </option>
+    ))}
+  </select>
 
-          <div className="w-full md:w-1/3">
-            <Select
-              isMulti
-              options={categoryOptions}
-              value={selectedCategories.map((cat) => ({ value: cat, label: cat }))}
-              onChange={(selected) =>
-                setSelectedCategories(selected ? selected.map((opt) => opt.value) : [])
-              }
-              placeholder="Filter by Category"
-              className="text-sm"
-              styles={{
-                control: (base) => ({
-                  ...base,
-                  backgroundColor: "#1f242b",
-                  borderColor: "#4ECDC4",
-                  color: "white",
-                  padding: "2px",
-                }),
-                singleValue: (base) => ({ ...base, color: "white" }),
-                menu: (base) => ({ ...base, backgroundColor: "#292F36", color: "white" }),
-                option: (base, state) => ({
-                  ...base,
-                  backgroundColor: state.isFocused ? "#4ECDC4" : "#292F36",
-                  color: state.isFocused ? "#292F36" : "white",
-                  cursor: "pointer",
-                }),
-                multiValue: (base) => ({ ...base, backgroundColor: "#4ECDC4" }),
-                multiValueLabel: (base) => ({ ...base, color: "#292F36", fontWeight: "bold" }),
-                multiValueRemove: (base) => ({
-                  ...base,
-                  color: "#292F36",
-                  ":hover": {
-                    backgroundColor: "#1f242b",
-                    color: "white",
-                  },
-                }),
-              }}
-            />
-          </div>
-        </div>
+  <div className="w-full md:w-1/3">
+    <Select
+      isMulti
+      options={categoryOptions}
+      value={selectedCategories.map((id) => {
+        const found = categoryOptions.find((opt) => opt.value === id);
+        return found || null;
+      })}
+      onChange={(selected) =>
+        setSelectedCategories(selected ? selected.map((opt) => opt.value) : [])
+      }
+      placeholder="Filter by Category"
+      className="text-sm"
+      styles={{
+        control: (base) => ({
+          ...base,
+          backgroundColor: "#1f242b",
+          borderColor: "#4ECDC4",
+          color: "white",
+          padding: "2px",
+        }),
+        singleValue: (base) => ({ ...base, color: "white" }),
+        menu: (base) => ({ ...base, backgroundColor: "#292F36", color: "white" }),
+        option: (base, state) => ({
+          ...base,
+          backgroundColor: state.isFocused ? "#4ECDC4" : "#292F36",
+          color: state.isFocused ? "#292F36" : "white",
+          cursor: "pointer",
+        }),
+        multiValue: (base) => ({ ...base, backgroundColor: "#4ECDC4" }),
+        multiValueLabel: (base) => ({ ...base, color: "#292F36", fontWeight: "bold" }),
+        multiValueRemove: (base) => ({
+          ...base,
+          color: "#292F36",
+          ":hover": {
+            backgroundColor: "#1f242b",
+            color: "white",
+          },
+        }),
+      }}
+    />
+  </div>
+</div>
+
 
         {/* List */}
         {loading ? (
@@ -145,9 +154,9 @@ export default function SectionGame() {
               >
                 <img
                   src={
-                    game.img
-                      ? `http://localhost:3000/uploads/${game.img}`
-                      : "/placeholder.jpg"
+                    game.img?.startsWith("http")
+                      ? game.img
+                      : `http://localhost:3000/uploads/${game.img}`
                   }
                   alt={game.title}
                   className="w-full h-60 object-cover transform duration-300 group-hover:scale-110"

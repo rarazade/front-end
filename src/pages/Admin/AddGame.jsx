@@ -9,14 +9,13 @@ const AddGame = () => {
   const [releaseDate, setReleaseDate] = useState("");
   const [category, setCategory] = useState([]);
   const [img, setMainImage] = useState(null);
-  const [screenshots, setScreenshots] = useState([]);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [categories, setCategories] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ Loading State
 
   const navigate = useNavigate();
   const imageRef = useRef(null);
-  const screenshotRef = useRef(null);
 
   const defaultPlatforms = ["PC", "Mobile", "Console"];
 
@@ -50,10 +49,6 @@ const AddGame = () => {
     setMainImage(e.target.files[0]);
   };
 
-  const handleScreenshotsChange = (e) => {
-    setScreenshots([...e.target.files]);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -63,6 +58,8 @@ const AddGame = () => {
       return;
     }
 
+    setIsSubmitting(true); // ✅ Mulai loading
+
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
@@ -70,10 +67,6 @@ const AddGame = () => {
     formData.append("platforms", JSON.stringify([platform]));
     formData.append("categoryIds", JSON.stringify(category));
     formData.append("img", img);
-
-    screenshots.forEach((ss) => {
-      formData.append("screenshots", ss);
-    });
 
     try {
       const token = localStorage.getItem("token");
@@ -91,6 +84,8 @@ const AddGame = () => {
       console.error("Error creating game:", error);
       setError("Gagal membuat game");
       setSuccess("");
+    } finally {
+      setIsSubmitting(false); // ✅ Selesai loading
     }
   };
 
@@ -183,9 +178,10 @@ const AddGame = () => {
 
         <button
           type="submit"
-          className="bg-[#4ECDC4] text-black font-semibold py-2 px-6 rounded hover:bg-[#3fb8b3]"
+          disabled={isSubmitting}
+          className="bg-[#4ECDC4] text-black font-semibold py-2 px-6 rounded hover:bg-[#3fb8b3] disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          Simpan
+          {isSubmitting ? "Menyimpan..." : "Simpan"}
         </button>
       </form>
     </div>

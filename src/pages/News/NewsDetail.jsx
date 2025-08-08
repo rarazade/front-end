@@ -16,6 +16,7 @@ export default function NewsDetail() {
         const data = await res.json();
         setNewsItem(data);
       } catch (error) {
+        console.error(error);
         setNewsItem(null);
       } finally {
         setLoading(false);
@@ -31,6 +32,7 @@ export default function NewsDetail() {
           .slice(0, 3);
         setLatestNews(latest);
       } catch (err) {
+        console.error(err);
         setLatestNews([]);
       }
     };
@@ -70,43 +72,57 @@ export default function NewsDetail() {
           <div className="md:w-2/3 mt-10">
             <h2 className="text-2xl font-bold mb-2">{newsItem.title}</h2>
             <p className="text-sm text-[#4ECDC4] mb-4">
-              {newsItem.source || "WGG Studio"} — {newsItem.date}
+              {newsItem.source || "WGG Studio"} —{" "}
+              {(newsItem.date || newsItem.createdAt || "").slice(0, 10)}
             </p>
 
             <p className="text-sm text-gray-300 border-b border-[#4ECDC4] pb-2">
-              {newsItem.excerpt}
+              {newsItem.excerpt || ""}
             </p>
 
-            <img
-              src={newsItem.image}
-              alt={newsItem.title}
-              className="mt-6 rounded w-full"
-            />
+            {newsItem.image && (
+              <div className="mt-6 w-full h-[400px] rounded overflow-hidden">
+              <img
+                src={`http://localhost:3000/uploads/${newsItem.image}`}
+                alt={newsItem.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            )}
 
             <div className="mt-4 text-sm text-gray-300 space-y-3 leading-relaxed">
-              <p>{newsItem.fullText || newsItem.content}</p>
+              <p>{newsItem.fullText || newsItem.content || ""}</p>
             </div>
-
-            <Link to="/news">
-              <button className="mt-10 bg-[#4ECDC4] text-black font-semibold px-4 py-2 rounded mb-6 text-sm hover:bg-[#3dc0b9]">
-                &lt; BACK TO ALL NEWS
-              </button>
-            </Link>
           </div>
 
           {/* RIGHT SIDEBAR */}
           <div className="md:w-1/3 mt-20 md:mt-15">
             <h3 className="text-lg font-bold text-[#4ECDC4] mb-4">LATEST NEWS</h3>
             {latestNews.map((news) => (
-              <Link to={`/news/${news.id}`} key={news.id}>
-                <div className="mb-6 border-b border-[#4ECDC4] pb-3 hover:text-[#4ECDC4] transition">
+            <Link to={`/news/${news.id}`} key={news.id}>
+              <div className="mb-6 border-b border-[#4ECDC4] pb-3 hover:text-[#4ECDC4] transition flex gap-4 items-start">
+                <img
+                  src={`http://localhost:3000/uploads/${news.image}`}
+                  alt={news.title}
+                  className="w-16 h-16 object-cover rounded"
+                />
+                <div>
                   <p className="text-sm font-medium">{news.title}</p>
-                  <p className="text-xs text-gray-400 mt-1">{news.date}</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {(news.date || news.createdAt || "").slice(0, 10)}
+                  </p>
                 </div>
-              </Link>
-            ))}
+              </div>
+            </Link>))}
           </div>
         </div>
+        <div className="flex justify-center">
+            <Link to="/news">
+              <button className="mt-10 bg-[#4ECDC4] text-black font-semibold px-4 py-2 rounded mb-6 text-sm hover:bg-[#3dc0b9]">
+                &lt; BACK TO ALL NEWS
+              </button>
+            </Link>
+          </div>
       </div>
     </>
   );

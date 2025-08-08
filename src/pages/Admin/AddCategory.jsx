@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 
 const AdminAddCategory = () => {
   const [name, setName] = useState("");
-  const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
+    setLoading(true);
 
     try {
       const token = localStorage.getItem("token");
@@ -28,10 +28,12 @@ const AdminAddCategory = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Gagal menambah kategori");
 
-      setSuccess("Kategori berhasil ditambahkan!");
-      setName("");
+      // Berhasil → arahkan kembali
+      navigate("/admin/dashboard");
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -49,7 +51,6 @@ const AdminAddCategory = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
         {error && <p className="text-red-500">{error}</p>}
-        {success && <p className="text-green-500">{success}</p>}
 
         <input
           type="text"
@@ -62,9 +63,10 @@ const AdminAddCategory = () => {
 
         <button
           type="submit"
+          disabled={loading}
           className="bg-[#4ECDC4] text-black font-semibold py-2 px-6 rounded hover:bg-[#3fb8b3]"
         >
-          Simpan
+          {loading ? "Menyimpan..." : "Simpan"}
         </button>
       </form>
     </div>
