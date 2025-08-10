@@ -45,7 +45,7 @@ export default function SectionGame() {
   useEffect(() => {
   const fetchMeta = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/games/meta");
+      const res = await fetch("http://localhost:3000/api/meta");
       const data = await res.json();
       console.log("✅ META:", data);
 

@@ -111,7 +111,7 @@ const AdminDashboard = () => {
                     <td className="py-2 px-4">{game.title}</td>
                     <td className="py-2 px-4">{game.platforms?.join(", ")}</td>
                     <td className="py-2 px-4">
-                      {game.categories?.map((c) => c.name).join(", ")}
+                      {game.categories?.map((c) => c.category.name).join(", ")}
                     </td>
                     <td className="py-2 px-4">
                       {new Date(game.releaseDate).toLocaleDateString()}

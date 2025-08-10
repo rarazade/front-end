@@ -33,6 +33,7 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/about" element={<About />} />
           <Route path="/games" element={<Games />} />
+          <Route path="/games/platform/:platform" element={<Games />} />
           <Route path="/games/:id" element={<GameDetail />} />
           <Route path="/news" element={<NewsPage />} />
           <Route path="/news/:id" element={<NewsDetail />} />
