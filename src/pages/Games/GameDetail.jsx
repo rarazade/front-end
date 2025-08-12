@@ -14,6 +14,16 @@ export default function GameDetail() {
         const res = await fetch(`http://localhost:3000/api/games/${id}`);
         if (!res.ok) throw new Error("Game not found");
         const data = await res.json();
+
+        // Pastikan systemRequirements berbentuk array, parse jika string
+        if (typeof data.systemRequirements === "string") {
+          try {
+            data.systemRequirements = JSON.parse(data.systemRequirements);
+          } catch {
+            data.systemRequirements = [];
+          }
+        }
+
         setGame(data);
       } catch (error) {
         console.error("Failed to fetch game:", error);
@@ -28,6 +38,9 @@ export default function GameDetail() {
 
   if (loading) return <p className="text-white text-center">Loading...</p>;
   if (!game) return <p className="text-white text-center">Game not found.</p>;
+
+  const minReq = game.requirements?.find(r => r.type === "minimum") || {};
+  const recReq = game.requirements?.find(r => r.type === "recommended") || {};
 
   return (
     <section className="bg-[#292F36] text-white min-h-screen py-10 px-4 mt-10">
@@ -70,27 +83,42 @@ export default function GameDetail() {
           <li>
             <strong>Category:</strong>{" "}
             {Array.isArray(game.categories)
-              ? game.categories.join(", ")
+              ? game.categories?.map((e) => e.category.name).join(", ")
               : game.categories}
           </li>
           <li>
-            <strong>Release Date:</strong> {game.releaseDate}
+            <strong>Release Date:</strong> {new Date(game.releaseDate).toLocaleDateString()}
           </li>
         </ul>
 
+        {/* System Requirements dari backend */}
         <div className="mt-6">
           <h3 className="text-lg font-semibold text-[#4ECDC4]">
             System Requirements
           </h3>
+
+          {/* Minimum */}
+          <h4 className="mt-2 font-semibold text-white">Minimum</h4>
           <ul className="text-sm text-gray-400 list-disc list-inside">
-            <li>OS: Windows 10 64-bit</li>
-            <li>RAM: 8 GB</li>
-            <li>Processor: Intel Core i5</li>
-            <li>GPU: GTX 1050 or equivalent</li>
-            <li>Storage: 5 GB available space</li>
+            <li>OS: {minReq.os || "-"}</li>
+            <li>RAM: {minReq.memory || "-"}</li>
+            <li>Processor: {minReq.processor || "-"}</li>
+            <li>GPU: {minReq.graphics || "-"}</li>
+            <li>Storage: {minReq.storage || "-"}</li>
+          </ul>
+
+          {/* Recommended */}
+          <h4 className="mt-4 font-semibold text-white">Recommended</h4>
+          <ul className="text-sm text-gray-400 list-disc list-inside">
+            <li>OS: {recReq.os || "-"}</li>
+            <li>RAM: {recReq.memory || "-"}</li>
+            <li>Processor: {recReq.processor || "-"}</li>
+            <li>GPU: {recReq.graphics || "-"}</li>
+            <li>Storage: {recReq.storage || "-"}</li>
           </ul>
         </div>
 
+          
         <div className="text-center mt-10">
           <button
             onClick={() => navigate(-1)}
