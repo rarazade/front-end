@@ -31,16 +31,6 @@ export default function Navbar() {
               News
             </Link>
           </li>
-
-          {/* Login Button */}
-          <li>
-            <Link
-              to="/admin/login"
-              className="ml-4 px-4 py-2 bg-[#4ECDC4] text-[#292F36] font-bold rounded hover:bg-[#3bbcb5] transition"
-            >
-              Admin Login
-            </Link>
-          </li>
         </ul>
       </div>
     </nav>
