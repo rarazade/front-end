@@ -52,20 +52,22 @@ export default function HeroSection() {
         className="absolute inset-0 w-full h-full object-cover"
       />
       {/* Content */}
-        <div className="relative z-10 h-full flex flex-col items-start justify-center text-left px-6 md:pl-20 text-white">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#4ECDC4]">
-            {current.game.title}
-          </h2>
-          <p className="max-w-2xl text-gray-200 text-lg line-clamp-3">
-            {current.game.description}
-          </p>
-          <Link
-            to={`games/${current.game.id}`}
-            className="inline-block bg-[#4ECDC4] hover:bg-[#4ECDC4]/80 text-[#292F36] font-semibold px-6 py-2 rounded-lg transition-colors"
-          >
-            READ MORE
-          </Link>
-        </div>
+      <div className="relative  h-full flex flex-col items-start 
+                      justify-center text-left md:pl-20 text-white 
+                      bg-gradient-to-r from-black/60 via-black/40 to-transparent rounded-lg">
+        <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#4ECDC4]">
+          {current.game.title}
+        </h2>
+        <p className="max-w-2xl text-gray-200 text-lg line-clamp-3">
+          {current.game.description}
+        </p>
+        <Link
+          to={`games/${current.game.id}`}
+          className="text-[#4ECDC4] font-semibold py-2 rounded-lg transition-colors mt-2 flex items-center gap-2"
+        >
+          READ MORE →
+        </Link>
+      </div>
 
 
       {/* Navigation buttons */}
@@ -83,7 +85,7 @@ export default function HeroSection() {
       </button>
 
       {/* Overlay gradient di bawah */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#292F36] via-transparent to-transparent"></div>
+      <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-[#292F36] via-transparent to-transparent"></div>
 
 
       {/* Indicator dots */}
@@ -98,7 +100,6 @@ export default function HeroSection() {
           />
         ))}
       </div>
-
     </section>
   );
 }
