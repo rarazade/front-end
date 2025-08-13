@@ -7,6 +7,15 @@ export default function GameDetail() {
 
   const [game, setGame] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeVideo, setActiveVideo] = useState(0);
+
+  const prevVideo = () => {
+  setActiveVideo((prev) => (prev - 1 + videos.length) % videos.length);
+  };
+
+  const nextVideo = () => {
+    setActiveVideo((prev) => (prev + 1) % videos.length);
+  };
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -39,14 +48,13 @@ export default function GameDetail() {
   if (loading) return <p className="text-white text-center">Loading...</p>;
   if (!game) return <p className="text-white text-center">Game not found.</p>;
 
+  const videos = game.videos || [];
   const minReq = game.requirements?.find(r => r.type === "minimum") || {};
   const recReq = game.requirements?.find(r => r.type === "recommended") || {};
 
   return (
-    <section className="bg-[#292F36] text-white min-h-screen py-10 px-4 mt-10">
-      <div className="max-w-5xl mx-auto space-y-10">
-        <h1 className="text-3xl font-bold text-[#4ECDC4]">{game.title}</h1>
-
+    <section className="bg-[#292F36] text-white min-h-screen pb-10">
+      <div className="relative w-full h-[80vh]">
         <img
           src={
             game.img
@@ -54,8 +62,18 @@ export default function GameDetail() {
               : "/placeholder.jpg"
           }
           alt={game.title}
-          className="w-full rounded-lg shadow"
+          className="w-full h-full object-cover object-center"
         />
+
+        {/* Overlay gradient di bawah */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#292F36] via-transparent to-transparent"></div>
+
+        {/* Judul di atas gambar */}
+        <div className="absolute bottom-6 left-6 text-white">
+          <h1 className="text-4xl text-[#4ECDC4] font-bold">{game.title}</h1>
+        </div>
+      </div>
+      <div className="max-w-4xl mx-auto space-y-10">
 
         <div className="mt-8 flex justify-center gap-8">
           <button className="bg-[#292F36] border-2 border-[#4ECDC4] text-[#4ECDC4] font-bold px-6 py-3 rounded hover:bg-[#1f2329] transition">
@@ -66,12 +84,85 @@ export default function GameDetail() {
           </button>
         </div>
 
+       {/* Videos */}
+        {videos.length > 0 && (
+          <div className="w-full">
+
+            {/* Video Utama */}
+            <div className="relative w-full max-w-5xl mx-auto">
+              <video
+                key={activeVideo}
+                src={videos[activeVideo]}
+                controls
+                autoPlay
+                muted
+                loop
+                className="w-full rounded-lg border border-gray-600"
+              />
+
+              {/* Tombol Prev */}
+              <button
+                onClick={prevVideo}
+                className="absolute top-1/2 -left-10 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-80"
+              >
+                ❮
+              </button>
+
+              {/* Tombol Next */}
+              <button
+                onClick={nextVideo}
+                className="absolute top-1/2 -right-10 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-80"
+              >
+                ❯
+              </button>
+            </div>
+
+            {/* Thumbnail */}
+            {videos.length > 1 && (
+              <div className="flex gap-2 mt-3 justify-center flex-wrap">
+                {videos.map((src, idx) => (
+                  <video
+                    key={idx}
+                    src={src}
+                    muted
+                    onClick={() => setActiveVideo(idx)}
+                    className={`w-28 h-20 rounded-md border cursor-pointer object-cover transition ${
+                      idx === activeVideo
+                        ? "border-yellow-400 border-2 scale-105"
+                        : "border-gray-600 hover:border-yellow-300"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         <div>
-          <h2 className="text-xl font-semibold mb-2 text-[#4ECDC4]">
-            About this game
+          <h2 className="text-xl font-bold mb-2 text-[#4ECDC4]">
+            ABOUT THIS GAME
           </h2>
           <p className="text-gray-300">{game.description}</p>
         </div>
+
+        {/* Screenshots */}
+        {game.screenshots?.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-3xl font-bold text-center text-[#4ECDC4] mb-4 uppercase">
+              Screenshot
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {game.screenshots.map((src, idx) => (
+                <img
+                  key={idx}
+                  src={src}
+                  alt={`screenshot-${idx}`}
+                  className="w-full h-40 object-cover rounded border border-gray-600"
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         <ul className="space-y-2 text-gray-400">
           <li>
@@ -91,35 +182,50 @@ export default function GameDetail() {
           </li>
         </ul>
 
-        {/* System Requirements dari backend */}
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold text-[#4ECDC4]">
-            System Requirements
-          </h3>
+        <div className="mt-10 pb-10">
+        <h3 className="text-xl font-bold text-[#4ECDC4] uppercase border-b border-gray-600 pb-2 mb-4">
+          System Requirements
+        </h3>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Minimum */}
-          <h4 className="mt-2 font-semibold text-white">Minimum</h4>
-          <ul className="text-sm text-gray-400 list-disc list-inside">
-            <li>OS: {minReq.os || "-"}</li>
-            <li>RAM: {minReq.memory || "-"}</li>
-            <li>Processor: {minReq.processor || "-"}</li>
-            <li>GPU: {minReq.graphics || "-"}</li>
-            <li>Storage: {minReq.storage || "-"}</li>
-          </ul>
+          <div>
+            <h5 className="text-[#4ECDC4] font-bold uppercase mb-3">Minimum :</h5>
+            <ul className="space-y-2 text-gray-300 list-disc list-inside marker:text-[#4ECDC4]">
+              <li>Prosesor 64-bit dan OS diperlukan</li>
+              <li>OS: {minReq.os || "-"}</li>
+              <li>Prosesor: {minReq.processor || "-"}</li>
+              <li>Memori: {minReq.memory || "-"}</li>
+              <li>Grafis: {minReq.graphics || "-"}</li>
+              <li>DirectX: {minReq.directx || "-"}</li>
+              <li>Penyimpanan: {minReq.storage || "-"}</li>
+              {minReq.additional && (
+                <li className="text-sm">{minReq.additional}</li>
+              )}
+            </ul>
+          </div>
 
           {/* Recommended */}
-          <h4 className="mt-4 font-semibold text-white">Recommended</h4>
-          <ul className="text-sm text-gray-400 list-disc list-inside">
-            <li>OS: {recReq.os || "-"}</li>
-            <li>RAM: {recReq.memory || "-"}</li>
-            <li>Processor: {recReq.processor || "-"}</li>
-            <li>GPU: {recReq.graphics || "-"}</li>
-            <li>Storage: {recReq.storage || "-"}</li>
-          </ul>
+          <div>
+            <h5 className="text-[#4ECDC4] font-bold uppercase mb-3">Direkomendasikan :</h5>
+            <ul className="space-y-2 text-gray-300 list-disc list-inside marker:text-[#4ECDC4]">
+              <li>Prosesor 64-bit dan OS diperlukan</li>
+              <li>OS: {recReq.os || "-"}</li>
+              <li>Prosesor: {recReq.processor || "-"}</li>
+              <li>Memori: {recReq.memory || "-"}</li>
+              <li>Grafis: {recReq.graphics || "-"}</li>
+              <li>DirectX: {recReq.directx || "-"}</li>
+              <li>Penyimpanan: {recReq.storage || "-"}</li>
+              {recReq.additional && (
+                <li className="text-sm">{recReq.additional}</li>
+              )}
+            </ul>
+          </div>
         </div>
+      </div>
 
           
-        <div className="text-center mt-10">
+        <div className="text-center -scroll-mt-10 mb-20">
           <button
             onClick={() => navigate(-1)}
             className="bg-[#4ECDC4] text-[#292F36] font-semibold px-6 py-3 rounded hover:bg-[#3dc0b9]"
@@ -127,6 +233,7 @@ export default function GameDetail() {
             ← Back to Games
           </button>
         </div>
+
       </div>
     </section>
   );
