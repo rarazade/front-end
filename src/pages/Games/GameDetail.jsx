@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { RequirementsDetail } from "./RequirementsDetail";
 
 export default function GameDetail() {
   const { id } = useParams();
@@ -40,9 +41,6 @@ export default function GameDetail() {
   if (!game) return <p className="text-white text-center">Game not found.</p>;
 
   const videos = game.videos || [];
-  // Mengecek apakah requirements nya untuk pc atau tidak
-  const minReq = Object.keys(game.requirements) == 'PC' ? game.requirements.PC.minReq : {}
-  const recReq = Object.keys(game.requirements) == 'PC' ? game.requirements.PC.recReq : {}
 
   return (
     <section className="bg-[#292F36] text-white min-h-screen pb-10">
@@ -174,48 +172,7 @@ export default function GameDetail() {
           </li>
         </ul>
 
-        <div className="mt-10 pb-10">
-        <h3 className="text-xl font-bold text-[#4ECDC4] uppercase border-b border-gray-600 pb-2 mb-4">
-          System Requirements
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Minimum */}
-          <div>
-            <h5 className="text-[#4ECDC4] font-bold uppercase mb-3">Minimum :</h5>
-            <ul className="space-y-2 text-gray-300 list-disc list-inside marker:text-[#4ECDC4]">
-              <li>Prosesor 64-bit dan OS diperlukan</li>
-              <li>OS: {minReq.os || "-"}</li>
-              <li>Prosesor: {minReq.processor || "-"}</li>
-              <li>Memori: {minReq.memory || "-"}</li>
-              <li>Grafis: {minReq.graphics || "-"}</li>
-              <li>DirectX: {minReq.directx || "-"}</li>
-              <li>Penyimpanan: {minReq.storage || "-"}</li>
-              {minReq.additional && (
-                <li className="text-sm">{minReq.additional}</li>
-              )}
-            </ul>
-          </div>
-
-          {/* Recommended */}
-          <div>
-            <h5 className="text-[#4ECDC4] font-bold uppercase mb-3">Direkomendasikan :</h5>
-            <ul className="space-y-2 text-gray-300 list-disc list-inside marker:text-[#4ECDC4]">
-              <li>Prosesor 64-bit dan OS diperlukan</li>
-              <li>OS: {recReq.os || "-"}</li>
-              <li>Prosesor: {recReq.processor || "-"}</li>
-              <li>Memori: {recReq.memory || "-"}</li>
-              <li>Grafis: {recReq.graphics || "-"}</li>
-              <li>DirectX: {recReq.directx || "-"}</li>
-              <li>Penyimpanan: {recReq.storage || "-"}</li>
-              {recReq.additional && (
-                <li className="text-sm">{recReq.additional}</li>
-              )}
-            </ul>
-          </div>
-        </div>
-      </div>
-
+        <RequirementsDetail requirements={game.requirements}/>
           
         <div className="text-center -scroll-mt-10 mb-20">
           <button
