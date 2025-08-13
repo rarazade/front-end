@@ -24,15 +24,6 @@ export default function GameDetail() {
         if (!res.ok) throw new Error("Game not found");
         const data = await res.json();
 
-        // Pastikan systemRequirements berbentuk array, parse jika string
-        if (typeof data.systemRequirements === "string") {
-          try {
-            data.systemRequirements = JSON.parse(data.systemRequirements);
-          } catch {
-            data.systemRequirements = [];
-          }
-        }
-
         setGame(data);
       } catch (error) {
         console.error("Failed to fetch game:", error);
@@ -49,8 +40,9 @@ export default function GameDetail() {
   if (!game) return <p className="text-white text-center">Game not found.</p>;
 
   const videos = game.videos || [];
-  const minReq = game.requirements?.find(r => r.type === "minimum") || {};
-  const recReq = game.requirements?.find(r => r.type === "recommended") || {};
+  // Mengecek apakah requirements nya untuk pc atau tidak
+  const minReq = Object.keys(game.requirements) == 'PC' ? game.requirements.PC.minReq : {}
+  const recReq = Object.keys(game.requirements) == 'PC' ? game.requirements.PC.recReq : {}
 
   return (
     <section className="bg-[#292F36] text-white min-h-screen pb-10">
