@@ -1,73 +1,104 @@
-import { useState, useEffect } from 'react';
-import draft1 from '../../assets/Draft_Design3.webp';
-import draft2 from '../../assets/LandingPage.webp';
-import draft3 from '../../assets/placeholder.jpg';
+import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
-const images = [draft1, draft2, draft3];
 
 export default function HeroSection() {
+  const [jumbotrons, setJumbotrons] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % images.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
-
   useEffect(() => {
-    const interval = setInterval(nextSlide, 5000);
-    return () => clearInterval(interval);
+    fetch("http://localhost:3000/api/jumbotrons")
+      .then((res) => res.json())
+      .then(setJumbotrons)
+      .catch(console.error);
   }, []);
 
+  // Auto slide tiap 5 detik
+  useEffect(() => {
+    if (jumbotrons.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % jumbotrons.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [jumbotrons]);
+
+  const prevSlide = () => {
+    setCurrentIndex(
+      (prev) => (prev - 1 + jumbotrons.length) % jumbotrons.length
+    );
+  };
+
+  const nextSlide = () => {
+    setCurrentIndex((prev) => (prev + 1) % jumbotrons.length);
+  };
+
+  if (jumbotrons.length === 0) {
+    return (
+      <section className="w-full h-[70vh] bg-[#292F36] flex items-center justify-center text-white">
+        <p>Belum ada jumbotron</p>
+      </section>
+    );
+  }
+
+  const current = jumbotrons[currentIndex];
+
   return (
-    <section
-      className="relative h-screen w-full transition-all duration-700"
-      style={{
-        backgroundImage: `url(${images[currentIndex]})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}>
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10" />
+    <section className="relative w-full h-[100vh] overflow-hidden">
+      {/* Background image */}
+      <img
+        src={current.game.imageUrl}
+        alt={current.game.title}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      {/* Content */}
+        <div className="relative z-10 h-full flex flex-col items-start justify-center text-left px-6 md:pl-20 text-white">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#4ECDC4]">
+            {current.game.title}
+          </h2>
+          <p className="max-w-2xl text-gray-200 text-lg line-clamp-3">
+            {current.game.description}
+          </p>
+          <Link
+            to={`games/${current.game.id}`}
+            className="inline-block bg-[#4ECDC4] hover:bg-[#4ECDC4]/80 text-[#292F36] font-semibold px-6 py-2 rounded-lg transition-colors"
+          >
+            READ MORE
+          </Link>
+        </div>
 
-      {/* Caption */}
-      <div className="absolute top-1/2 left-6 sm:left-20 -translate-y-1/2 z-10 text-white max-w-xl">
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-[#4ECDC4] drop-shadow-lg">
-          Who Talk?
-        </h1>
-        <p className="mt-3 text-base sm:text-lg leading-relaxed drop-shadow-md text-gray-100">
-          Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-          <br />
-          It has been the industry's standard dummy text ever since the 1500s.
-        </p>
-        <button className="mt-5 px-4 py-2 bg-[#4ECDC4] text-[#292F36] font-bold hover:bg-[#e06f00] shadow-md transition">
-          Read more
-        </button>
-      </div>
 
-      {/* Prev Button */}
+      {/* Navigation buttons */}
       <button
         onClick={prevSlide}
-        className="absolute top-1/2 left-4 -translate-y-1/2 bg-[#292F36]/60 hover:bg-[#292F36]/90 text-white p-2 rounded-full z-10"
-        aria-label="Previous Slide"
+        className="absolute left-4 top-1/2 -translate-y-1/2 bg-[#292F36]/50 hover:bg-[#292F36]/70 p-3 rounded-full text-white z-10"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
+        <ChevronLeft size={28} />
       </button>
-
-      {/* Next Button */}
       <button
         onClick={nextSlide}
-        className="absolute top-1/2 right-4 -translate-y-1/2 bg-[#292F36]/60 hover:bg-[#292F36]/90 text-white p-2 rounded-full z-10"
-        aria-label="Next Slide"
+        className="absolute right-4 top-1/2 -translate-y-1/2 bg-[#292F36]/50 hover:bg-[#292F36]/70 p-3 rounded-full text-white z-10"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
+        <ChevronRight size={28} />
       </button>
+
+      {/* Overlay gradient di bawah */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#292F36] via-transparent to-transparent"></div>
+
+
+      {/* Indicator dots */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+        {jumbotrons.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentIndex(i)}
+            className={`w-3 h-3 rounded-full transition-all ${
+              currentIndex === i ? "bg-white" : "bg-gray-500"
+            }`}
+          />
+        ))}
+      </div>
+
     </section>
   );
 }

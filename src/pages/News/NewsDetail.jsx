@@ -119,7 +119,7 @@ export default function NewsDetail() {
         <div className="flex justify-center">
             <Link to="/news">
               <button className="mt-10 bg-[#4ECDC4] text-black font-semibold px-4 py-2 rounded mb-6 text-sm hover:bg-[#3dc0b9]">
-                &lt; BACK TO ALL NEWS
+                &lt; BACK
               </button>
             </Link>
           </div>

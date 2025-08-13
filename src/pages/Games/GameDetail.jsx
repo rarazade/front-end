@@ -46,7 +46,7 @@ export default function GameDetail() {
 
   return (
     <section className="bg-[#292F36] text-white min-h-screen pb-10">
-      <div className="relative w-full h-[80vh]">
+      <div className="relative w-full h-[100vh]">
         <img
           src={
             game.img
@@ -222,7 +222,7 @@ export default function GameDetail() {
             onClick={() => navigate(-1)}
             className="bg-[#4ECDC4] text-[#292F36] font-semibold px-6 py-3 rounded hover:bg-[#3dc0b9]"
           >
-            ← Back to Games
+            ← BACK
           </button>
         </div>
 
