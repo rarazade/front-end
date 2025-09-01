@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import Select from "react-select";
+import background from "../../assets/13.jpg";
+import { motion } from "framer-motion";
 
 export default function SectionGame() {
   const { platform, category } = useParams();
@@ -65,7 +67,9 @@ export default function SectionGame() {
 }));
 
   return (
-    <section className="bg-[#292F36] text-white py-16 px-6 min-h-screen">
+    <section 
+    className=" relative text-white py-16 px-6 min-h-screen bg-no-repeat bg-cover bg-center bg-black/60 bg-blend-overlay"
+    style={{ backgroundImage: `url(${background})`}}>
       <div className="max-w-7xl mx-auto">
         <h2 className="text-3xl font-bold text-[#4ECDC4] mb-8 text-center">
           Explore Our Games
@@ -140,34 +144,65 @@ export default function SectionGame() {
 
 
         {/* List */}
-        {loading ? (
+        {/* {loading ? (
           <p className="text-center text-gray-400">Loading games...</p>
         ) : gamesData.length === 0 ? (
           <p className="text-center mt-8 text-gray-400">No games found.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {gamesData.map((game) => (
-              <Link
-                to={`/games/${game.id}`}
-                key={game.id}
-                className="relative group overflow-hidden rounded-lg border-4 border-[#4ECDC4] shadow-md"
-              >
-                <img
-                  src={
-                    game.img?.startsWith("http")
-                      ? game.img
-                      : `http://localhost:3000/uploads/${game.img}`
-                  }
-                  alt={game.title}
-                  className="w-full h-60 object-cover transform duration-300 group-hover:scale-110"
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-center py-2 px-3">
-                  <p className="text-sm font-semibold">{game.title}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+        ) : ( */}
+
+        <div className="flex flex-wrap justify-center gap-6">
+  {gamesData.map((game, idx) => (
+    <motion.div
+      key={game.id}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: idx * 0.1 }}
+      viewport={{ once: false, amount: 0.2 }}
+      className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] max-w-[400px]"
+    >
+      <Link
+        to={`/games/${game.id}`}
+        className="relative group overflow-hidden rounded-lg border-2 border-[#4ECDC4] shadow-lg block"
+      >
+        {/* GAMBAR - Zoom saat hover */}
+        <img
+          src={
+            game.img?.startsWith("http")
+              ? game.img
+              : `http://localhost:3000/uploads/${game.img}`
+          }
+          alt={game.title}
+          className="w-full h-60 object-cover transform transition-transform duration-500 group-hover:scale-110"
+        />
+
+        {/* TITLE BAWAH - Di atas gambar & hilang saat hover */}
+        <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-[#4ECDC4] text-center py-2 px-3 transition-opacity duration-300 group-hover:opacity-0">
+          <p className="text-sm font-semibold line-clamp-1">{game.title}</p>
+        </div>
+
+        {/* OVERLAY + TITLE TENGAH - Muncul langsung saat hover */}
+        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
+          <motion.span
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+            className="text-[#4ECDC4] text-xl font-bold"
+          >
+            {game.title}
+          </motion.span>
+        </div>
+      </Link>
+    </motion.div>
+  ))}
+</div>
+
+
+
+
+  
+
+
+        {/* )} */}
       </div>
     </section>
   );

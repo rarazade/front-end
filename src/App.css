@@ -1,42 +1,218 @@
+/* ===== Base ===== */
+:root {
+  --bg: #292F36;             /* dark base */
+  --card: #1e1e2e;
+  --muted: #9aa0a6;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background-color: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hindari memaksa center semua konten */
 #root {
-  max-width: 1280px;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;     /* padding global diatur per section */
+  text-align: left;
+}
+
+
+
+/* ===== Animations (single source of truth) ===== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-scroll {
+  display: flex;
+  width: max-content;
+  animation: scroll 15s linear infinite;
+}
+
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 5s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 1s ease-out forwards;
+}
+
+.animate-fadeIn  { animation: fadeIn 0.9s ease-out both; }
+.animate-slideUp { animation: slideUp 0.9s ease-out both; }
+
+/* Delay utilities (opsional untuk stagger) */
+.delay-100 { animation-delay: .1s }
+.delay-200 { animation-delay: .2s }
+.delay-300 { animation-delay: .3s }
+.delay-400 { animation-delay: .4s }
+
+/* ===== Hero / Banner ===== */
+.hero {
+  position: relative;
+  height: 65vh;
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;   /* parallax feel */
+}
+.hero::after {
+  /* overlay gradasi supaya teks kebaca */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,.7), rgba(0,0,0,.4) 50%, rgba(0,0,0,.85));
+  pointer-events: none;
+}
+
+/* ===== Sections ===== */
+.section {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  padding: 5rem 1.5rem;
+}
+.section-narrow {
+  max-width: 900px;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
+/* ===== Cards (Vision/Mission/Team) ===== */
 .card {
-  padding: 2em;
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 40px rgba(0,0,0,.35);
 }
 
-.read-the-docs {
-  color: #888;
+/* ===== Image utilities (seragam ukuran) ===== */
+.img-cover-48 {
+  width: 100%;
+  height: 12rem;            /* h-48 */
+  object-fit: cover;
+  border-radius: 14px;
+  display: block;
 }
+.img-cover-56 {
+  width: 100%;
+  height: 14rem;            /* h-56 */
+  object-fit: cover;
+  border-radius: 14px;
+  display: block;
+}
+
+/* Grid item frame (untuk efek zoom rapi) */
+.frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+.frame:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 34px rgba(0,0,0,.35);
+}
+.frame img {
+  transform: scale(1);
+  transition: transform .6s ease;
+}
+.frame:hover img {
+  transform: scale(1.08);
+}
+
+/* Overlay untuk hover pada gallery */
+.frame .overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  opacity: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 600;
+  transition: opacity .3s ease;
+}
+.frame:hover .overlay {
+  opacity: 1;
+}
+
+/* ===== Masonry (Dokumentasi) ===== */
+.masonry {
+  column-count: 2;
+  column-gap: 1.5rem;
+}
+.masonry > .brick {
+  break-inside: avoid;
+  margin-bottom: 1.5rem;
+}
+@media (min-width: 768px) {
+  .masonry { column-count: 3; }
+}
+@media (min-width: 1024px) {
+  .masonry { column-count: 4; }
+}
+
+/* ===== Horizontal Scroll (Team) ===== */
+.h-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 2rem;
+  padding-bottom: .5rem;
+  scroll-snap-type: x mandatory;
+}
+.h-scroll > * {
+  scroll-snap-align: start;
+}
+.h-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+.h-scroll::-webkit-scrollbar-track {
+  background: rgba(255,255,255,.06);
+  border-radius: 999px;
+}
+.h-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.3);
+  border-radius: 999px;
+}
+
+/* ===== Small helpers ===== */
+.center { text-align: center; }       /* pakai ini jika butuh center text khusus */
+.muted  { color: var(--muted); }

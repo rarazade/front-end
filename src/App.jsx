@@ -6,8 +6,8 @@ import GameDetail from "./pages/Games/GameDetail";
 import NewsPage from "./pages/News/NewsPage";
 import NewsDetail from "./pages/News/NewsDetail";
 import Navbar from "./components/common/Navbar";
-import Footer from "./components/common/Footer";
 import BackToTopButton from "./components/common/BackToTopButton";
+import Footer from "./components/common/Footer";
 
 export default function App() {
   const location = useLocation();
@@ -16,6 +16,7 @@ export default function App() {
       <>
       {/* Navbar selalu tampil */}
       <Navbar />
+     
 
       <main className="flex-grow">
         <Routes>
@@ -31,8 +32,8 @@ export default function App() {
       </main>
 
       {/* Footer & Back to Top */}
-      <Footer />
       <BackToTopButton />
+       <Footer />
     </>
   );
 }

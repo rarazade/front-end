@@ -1,17 +1,35 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { RequirementsDetail } from "./RequirementsDetail";
+import "../../style.css";
+import background from "../../assets/13.jpg";
 
 export default function GameDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-
+  const [activeSection, setActiveSection] = useState(0); // buat dots
+  const [activeScreenshot, setActiveScreenshot] = useState(0); // buat slider
   const [game, setGame] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeVideo, setActiveVideo] = useState(0);
 
+  const sectionRefs = useRef([]);
+
+ const prevSlide = () => {
+  setActiveScreenshot((prev) =>
+    prev === 0 ? game.screenshots.length - 1 : prev - 1
+  );
+};
+
+const nextSlide = () => {
+  setActiveScreenshot((prev) =>
+    prev === game.screenshots.length - 1 ? 0 : prev + 1
+  );
+};
+
+
   const prevVideo = () => {
-  setActiveVideo((prev) => (prev - 1 + videos.length) % videos.length);
+    setActiveVideo((prev) => (prev - 1 + videos.length) % videos.length);
   };
 
   const nextVideo = () => {
@@ -24,7 +42,6 @@ export default function GameDetail() {
         const res = await fetch(`http://localhost:3000/api/games/${id}`);
         if (!res.ok) throw new Error("Game not found");
         const data = await res.json();
-
         setGame(data);
       } catch (error) {
         console.error("Failed to fetch game:", error);
@@ -33,157 +50,234 @@ export default function GameDetail() {
         setLoading(false);
       }
     };
-
     fetchGame();
   }, [id]);
+
+  // Scroll observer untuk update dots
+  useEffect(() => {
+    if (!game) return; // Jangan jalan kalau game belum ada
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const idx = sectionRefs.current.indexOf(entry.target);
+          if (idx !== -1) setActiveSection(idx);
+        }
+      });
+    },
+    { threshold: 0.6 }
+  );
+
+  // Observe hanya section yang ada
+  sectionRefs.current
+    .filter((section) => section)
+    .forEach((section) => observer.observe(section));
+
+  return () => observer.disconnect();
+}, [game]);
 
   if (loading) return <p className="text-white text-center">Loading...</p>;
   if (!game) return <p className="text-white text-center">Game not found.</p>;
 
   const videos = game.videos || [];
 
-  return (
-    <section className="bg-[#292F36] text-white min-h-screen pb-10">
-      <div className="relative w-full h-[100vh]">
-        <img
-          src={
-            game.img
-              ? `http://localhost:3000/uploads/${game.img}`
-              : "/placeholder.jpg"
-          }
-          alt={game.title}
-          className="w-full h-full object-cover object-center"
-        />
+  const scrollToSection = (index) => {
+    sectionRefs.current[index]?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
 
-        {/* Overlay gradient di bawah */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#292F36] via-transparent to-transparent"></div>
+  {/* === Helper Function === */}
+const getYoutubeEmbedUrl = (url) => {
+  let videoId = "";
 
-        {/* Judul di atas gambar */}
-        <div className="absolute bottom-6 left-6 text-white">
-          <h1 className="text-4xl text-[#4ECDC4] font-bold">{game.title}</h1>
-        </div>
-      </div>
-      <div className="max-w-4xl mx-auto space-y-10">
+  if (url.includes("watch?v=")) {
+    videoId = url.split("watch?v=")[1].split("&")[0];
+  } else if (url.includes("youtu.be/")) {
+    videoId = url.split("youtu.be/")[1].split("?")[0];
+  } else if (url.includes("embed/")) {
+    videoId = url.split("embed/")[1].split("?")[0];
+  }
 
-        <div className="mt-8 flex justify-center gap-8">
-          <button className="bg-[#292F36] border-2 border-[#4ECDC4] text-[#4ECDC4] font-bold px-6 py-3 rounded hover:bg-[#1f2329] transition">
-            DOWNLOAD NOW
-          </button>
-          <button className="bg-[#292F36] border-2 border-[#4ECDC4] text-[#4ECDC4] font-bold px-6 py-3 rounded hover:bg-[#1f2329] transition">
-            DOWNLOAD OUR PRESSKIT
-          </button>
-        </div>
+  return `https://www.youtube.com/embed/${videoId}`;
+};
 
-       {/* Videos */}
-        {videos.length > 0 && (
-          <div className="w-full">
+return (
+  <div className="text-white h-screen overflow-y-scroll snap-y snap-mandatory no-scrollbar relative"
+        style={{ backgroundImage: `url(${background})` }}>
+    
+    {/* Background Fixed */}
+    <div 
+      className="fixed inset-0 -z-10"
+      style={{
+        background: "linear-gradient(to bottom, #292F36, #1f2a30, #1f242b, #1f2029, #0f2027)"
+      }}
+    ></div>
 
-            {/* Video Utama */}
-            <div className="relative w-full max-w-5xl mx-auto">
-              <video
-                key={activeVideo}
-                src={videos[activeVideo]}
-                controls
-                autoPlay
-                muted
-                loop
-                className="w-full rounded-lg border border-gray-600"
-              />
-
-              {/* Tombol Prev */}
-              <button
-                onClick={prevVideo}
-                className="absolute top-1/2 -left-10 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-80"
-              >
-                ❮
-              </button>
-
-              {/* Tombol Next */}
-              <button
-                onClick={nextVideo}
-                className="absolute top-1/2 -right-10 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-80"
-              >
-                ❯
-              </button>
-            </div>
-
-            {/* Thumbnail */}
-            {videos.length > 1 && (
-              <div className="flex gap-2 mt-3 justify-center flex-wrap">
-                {videos.map((src, idx) => (
-                  <video
-                    key={idx}
-                    src={src}
-                    muted
-                    onClick={() => setActiveVideo(idx)}
-                    className={`w-28 h-20 rounded-md border cursor-pointer object-cover transition ${
-                      idx === activeVideo
-                        ? "border-yellow-400 border-2 scale-105"
-                        : "border-gray-600 hover:border-yellow-300"
-                    }`}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        <div>
-          <h2 className="text-xl font-bold mb-2 text-[#4ECDC4]">
-            ABOUT THIS GAME
-          </h2>
-          <p className="text-gray-300">{game.description}</p>
-        </div>
-
-        {/* Screenshots */}
-        {game.screenshots?.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-3xl font-bold text-center text-[#4ECDC4] mb-4 uppercase">
-              Screenshot
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {game.screenshots.map((src, idx) => (
-                <img
-                  key={idx}
-                  src={src}
-                  alt={`screenshot-${idx}`}
-                  className="w-full h-40 object-cover rounded border border-gray-600"
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        <ul className="space-y-2 text-gray-400">
-          <li>
-            <strong>Platform:</strong>{" "}
-            {Array.isArray(game.platforms)
-              ? game.platforms.join(", ")
-              : game.platforms}
-          </li>
-          <li>
-            <strong>Category:</strong>{" "}
-            {Array.isArray(game.categories)
-              ? game.categories?.map((e) => e.category.name).join(", ")
-              : game.categories}
-          </li>
-          <li>
-            <strong>Release Date:</strong> {new Date(game.releaseDate).toLocaleDateString()}
-          </li>
-        </ul>
-
-        <RequirementsDetail requirements={game.requirements}/>
-          
-        <div className="text-center -scroll-mt-10 mb-20">
+    {/* Navigasi titik modern */}
+    <div className="fixed right-6 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-50">
+      {sectionRefs.current
+        .filter((section) => section)
+        .map((_, idx) => (
           <button
-            onClick={() => navigate(-1)}
-            className="bg-[#4ECDC4] text-[#292F36] font-semibold px-6 py-3 rounded hover:bg-[#3dc0b9]"
+            key={idx}
+            onClick={() => scrollToSection(idx)}
+            className="w-6 h-6 flex items-center justify-center group"
           >
-            ← BACK
+            {activeSection === idx ? (
+              <span className="w-5 h-5 border-2 border-[#4ECDC4] rounded-full flex items-center justify-center transition-all duration-300">
+                <span className="w-2 h-2 bg-[#4ECDC4] rounded-full animate-pulse"></span>
+              </span>
+            ) : (
+              <span className="w-3 h-3 bg-[#4ECDC4] rounded-full opacity-70 group-hover:opacity-100 transition-all duration-300"></span>
+            )}
           </button>
-        </div>
+        ))}
+    </div>
 
+    {/* Section 1 */}
+    <section
+      ref={(el) => (sectionRefs.current[0] = el)}
+      className="relative w-full h-screen snap-start flex flex-col justify-end p-6 bg-black/40"
+    >
+      <img
+        src={game.img ? `http://localhost:3000/uploads/${game.img}` : "/placeholder.jpg"}
+        alt={game.title}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#292F36]/90 via-transparent to-transparent"></div>
+      <div className="relative bottom-6 left-0 flex flex-col md:flex-row gap-4 md:gap-8 items-start md:items-center z-10">
+        <h1 className="text-3xl md:text-4xl text-[#4ECDC4] font-bold">
+          {game.title}
+        </h1>
       </div>
     </section>
-  );
+
+
+    {/* === Section 2 - Videos === */}
+{videos.length > 0 && (
+  <section
+    ref={(el) => (sectionRefs.current[1] = el)}
+    className="relative w-full h-screen snap-start py-12 px-6 md:px-12 flex flex-col md:flex-row gap-10 items-center justify-center bg-black/40"
+  >
+    {/* Video Player */}
+    <div className="relative flex-1 mt-5 z-10">
+      <div className="relative max-w-6xl mx-auto">
+        <iframe
+          key={activeVideo}
+          src={getYoutubeEmbedUrl(videos[activeVideo])}
+          title={`youtube-video-${activeVideo}`}
+          className="w-full h-[330px] rounded-xl shadow-lg border border-[#4ECDC4]/30"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        ></iframe>
+
+        {/* Prev/Next Button */}
+        <button 
+          onClick={prevVideo} 
+          className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-black/50 backdrop-blur-sm text-white p-2 rounded-full hover:bg-black/70 transition"
+        >
+          ❮
+        </button>
+        <button 
+          onClick={nextVideo} 
+          className="absolute top-1/2 -right-6 transform -translate-y-1/2 bg-black/50 backdrop-blur-sm text-white p-2 rounded-full hover:bg-black/70 transition"
+        >
+          ❯
+        </button>
+      </div>
+
+      {/* Thumbnails */}
+      <div className="justify-center mt-4 flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+        {videos.map((video, idx) => {
+          // ambil videoId dengan helper juga
+          const embedUrl = getYoutubeEmbedUrl(video);
+          const videoId = embedUrl.split("embed/")[1];
+
+          return (
+            <img
+              key={idx}
+              src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
+              alt={`thumb-${idx}`}
+              className={`w-28 h-20 object-cover rounded-lg cursor-pointer border-2 transition ${
+                activeVideo === idx ? "border-[#4ECDC4]" : "border-transparent hover:border-white/30"
+              }`}
+              onClick={() => setActiveVideo(idx)}
+            />
+          );
+        })}
+      </div>
+    </div>
+
+    {/* Deskripsi */}
+    <div className="relative flex-1 md:pl-5 z-10">
+      <h2 className="text-3xl font-bold mb-6 text-[#4ECDC4] uppercase tracking-wide">About This Game</h2>
+      <p className="text-gray-200 leading-relaxed text-lg">{game.description}</p>
+    </div>
+  </section>
+)}
+
+
+{/* Section 3 - Screenshots */}
+{game.screenshots?.length > 0 && (
+  <section
+    ref={(el) => (sectionRefs.current[2] = el)}
+    className="relative w-full h-screen snap-start py-16 flex flex-col md:flex-row gap-8 items-center justify-center px-7 bg-black/40"
+  >
+  <div className="relative w-full h-full z-10">
+      {/* Carousel Screenshot */}
+      <div className="max-w-6xl mx-auto space-y-10">
+        <h3 className="mt-6 text-3xl font-bold text-center text-[#4ECDC4] uppercase mb-10">Screenshots</h3>
+        <div className="relative flex justify-center items-center h-[300px] sm:h-[400px] overflow-hidden max-w-full">
+          {game.screenshots.map((s, idx) => {
+            let position = "hidden";
+            if (idx === activeScreenshot) position = "opacity-100 scale-100 z-20 translate-x-0";
+            else if (idx === (activeScreenshot - 1 + game.screenshots.length) % game.screenshots.length) position = "opacity-100 scale-90 z-10 -translate-x-1/2";
+            else if (idx === (activeScreenshot + 1) % game.screenshots.length) position = "opacity-100 scale-90 z-10 translate-x-1/2";
+
+            return (
+              <div key={s.id} className={`absolute transition-all duration-200 ease-in-out ${position} w-[90%] sm:w-[600px]`}>
+                <div className="relative overflow-hidden shadow-lg rounded-xl">
+                  <img src={s.url} alt={`screenshot-${idx}`} className="w-full h-[200px] sm:h-[300px] object-cover" />
+                </div>
+              </div>
+            );
+          })}
+          <button onClick={prevSlide} className="absolute left-4 top-1/2 -translate-y-1/2 bg-[#4ECDC4]/50 hover:bg-[#4ECDC4]/80 p-2 sm:p-3 rounded-full z-30">❮</button>
+          <button onClick={nextSlide} className="absolute right-4 top-1/2 -translate-y-1/2 bg-[#4ECDC4]/50 hover:bg-[#4ECDC4]/80 p-2 sm:p-3 rounded-full z-30">❯</button>
+        </div>
+      </div>
+    </div>
+  </section>
+)}
+
+    {/* Section 4 - Info */}
+    <section
+      ref={(el) => (sectionRefs.current[3] = el)}
+      className="relative text-white w-full min-h-screen snap-start flex flex-col items-center justify-center px-6 py-16 bg-black/40"
+    >
+     <div className="relative z-10 flex flex-col items-center justify-center w-full">
+        <ul className="mt-8 flex flex-wrap justify-center gap-6 text-gray-300 bg-[#1f2029]/90 p-8 rounded-2xl shadow-xl max-w-4xl w-full border border-[#4ECDC4]/40">
+          <li className="flex items-center gap-2 text-lg"><span className="text-[#4ECDC4] font-semibold">Platform:</span> {Array.isArray(game.platforms) ? game.platforms.join(", ") : game.platforms}</li>
+          <li className="flex items-center gap-2 text-lg"><span className="text-[#4ECDC4] font-semibold">Category:</span> {Array.isArray(game.categories) ? game.categories?.map((e) => e.category.name).join(", ") : game.categories}</li>
+          <li className="flex items-center gap-2 text-lg"><span className="text-[#4ECDC4] font-semibold">Release Date:</span> {new Date(game.releaseDate).toLocaleDateString()}</li>
+        </ul>
+        <div className="mt-6 w-full max-w-4xl">
+          <RequirementsDetail requirements={game.requirements} />
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-6">
+          <button className="bg-[#4ECDC4] text-[#292F36] font-bold text-sm px-10 py-4 rounded-lg shadow-lg hover:bg-[#3dc0b9] hover:shadow-xl transition-all duration-300">DOWNLOAD NOW</button>
+          <button className="bg-[#4ECDC4] text-[#292F36] font-bold text-sm px-10 py-4 rounded-lg shadow-lg hover:bg-[#3dc0b9] hover:shadow-xl transition-all duration-300">DOWNLOAD OUR PRESSKIT</button>
+        </div>
+        <div className="flex justify-center gap-4">
+          <button onClick={() => navigate(-1)} className="mt-10 bg-[#292F36] border-2 border-[#4ECDC4] text-[#4ECDC4] font-semibold px-6 py-3 rounded-lg hover:bg-[#1f2329] transition shadow-md">← Back</button>
+        </div>
+      </div>
+    </section>
+  </div>
+);
+
 }
