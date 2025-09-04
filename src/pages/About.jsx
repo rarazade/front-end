@@ -1,32 +1,11 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
 import { motion } from "framer-motion";
 import { useRef } from "react";
 import Slider from "react-slick";
-
+import useAbout from "../hooks/about/useAbout";
 
 export default function AboutPage() {
-  const [about, setAbout] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { about, loading, error } = useAbout();
   const scrollRef = useRef(null);
-
-  useEffect(() => {
-    const fetchAbout = async () => {
-      try {
-        const res = await axios.get("http://localhost:3000/api/about");
-        if (res.data.length > 0) {
-          setAbout(res.data[0]);
-        } else {
-          setAbout(null);
-        }
-      } catch (err) {
-        console.error("Error fetching about:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAbout();
-  }, []);
 
   if (loading) {
     return (
@@ -36,7 +15,7 @@ export default function AboutPage() {
     );
   }
 
-  if (!about) {
+  if (error || !about) {
     return (
       <div className="flex items-center justify-center min-h-screen text-red-500">
         Data tidak ditemukan
@@ -48,22 +27,18 @@ export default function AboutPage() {
   const dokumentasi = about.images?.filter((img) => img.type === "DOKUMENTASI");
   const lampiran = about.images?.filter((img) => img.type === "LAMPIRAN");
 
-
   return (
     <div className="bg-white text-black relative">
 
-  {/* Hero Banner */}
   {banner && (
     <section
   className="relative h-[100vh] flex items-center justify-center bg-cover opacity-90"
   style={{
-    backgroundImage: `url("http://localhost:3000/uploads/${banner.url}")`,
+    backgroundImage: `url("${import.meta.env.VITE_API_BASE_URL}/uploads/${banner.url}")`,
   }}
 >
-  {/* Overlay */}
   <div className="absolute inset-0 bg-[#292F36]/20" />
 
-  {/* Content */}
   <motion.div
     className="relative z-10 text-center px-6"
     initial={{ opacity: 0, y: 50 }}
@@ -81,10 +56,8 @@ export default function AboutPage() {
   )}
 
 
-      {/* Section About (Who We Are) */}
 <section className="relative py-16 m-10 overflow-hidden">
   <div className="max-w-6xl mx-auto text-justify space-y-10 relative z-10">
-    {/* Teks Tengah */}
     <h2 className="text-3xl text-center md:text-5xl font-bold">
       {about.title}
     </h2>
@@ -115,10 +88,7 @@ export default function AboutPage() {
 
 <section className="py-20 px-6 flex justify-center">
   <div className="relative w-full max-w-3xl">
-    {/* Vertical Line */}
     <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-teal-400 via-gray-300 to-pink-500"></div>
-
-    {/* Vision */}
     <motion.div
       initial={{ opacity: 0, x: -60 }}
       whileInView={{ opacity: 1, x: 0 }}
@@ -129,12 +99,10 @@ export default function AboutPage() {
       <div className="relative w-1/2 pr-10 text-right">
         <h2 className="text-2xl font-bold mb-2">Our Vision</h2>
         <p className="text-gray-600 leading-relaxed">{about.vision}</p>
-        {/* Dot */}
         <span className="absolute top-2 right-[-18px] w-6 h-6 bg-teal-400 rounded-full shadow-lg"></span>
       </div>
     </motion.div>
 
-    {/* Mission */}
     <motion.div
       initial={{ opacity: 0, x: 60 }}
       whileInView={{ opacity: 1, x: 0 }}
@@ -207,10 +175,9 @@ export default function AboutPage() {
 )} */}
 
 
-{/* Curve separator (lebih besar) */}
 <div className="relative w-full overflow-hidden leading-[0]">
   <svg
-    className="relative block w-full h-60" // tingginya lebih besar
+    className="relative block w-full h-60"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 1440 320"
     preserveAspectRatio="none"
@@ -256,7 +223,7 @@ export default function AboutPage() {
           <div key={tm.id} className="px-4">
             <div className="bg-white shadow-md hover:shadow-xl overflow-hidden transition">
               <img
-                src={tm.photo ? `http://localhost:3000/uploads/${tm.photo}` : "/default-avatar.png"}
+                src={tm.photo ? `${import.meta.env.VITE_UPLOADS_BASE_URL}/${tm.photo}` : "/default-avatar.png"}
                 alt={tm.name}
                 className="w-full h-48 object-cover"
               />
@@ -295,11 +262,6 @@ export default function AboutPage() {
     
   </section>
 )}
-
-
-
-
-
     </div>
   );
 }

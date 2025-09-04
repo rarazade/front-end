@@ -1,44 +1,23 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import { motion } from "framer-motion";
+import { useGames } from "../../hooks/games/useGames";
 import background from "../../assets/bg2.jpg";
 
 export default function GameSection() {
-  const [gamesByPlatform, setGamesByPlatform] = useState({
-    PC: [],
-    Mobile: [],
-  });
+  const { games } = useGames();
 
-  useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/api/games");
-        const games = response.data;
-
-        const grouped = {
-          PC: games.filter((game) => game.platforms[0] === "PC").slice(0, 2),
-          Mobile: games.filter((game) => game.platforms[0] === "Mobile").slice(0, 2),
-        };
-
-        setGamesByPlatform(grouped);
-      } catch (error) {
-        console.error("Gagal fetch data game:", error);
-      }
-    };
-
-    fetchGames();
-  }, []);
+  const gamesByPlatform = {
+    PC: games.filter((g) => g.platforms[0] === "PC").slice(0, 2),
+    Mobile: games.filter((g) => g.platforms[0] === "Mobile").slice(0, 2),
+  };
 
   const gameSections = [
-    { type: "PC Games By WGG", platform: "PC", direction: -100 }, // dari kiri
-    { type: "Mobile Games By WGG", platform: "Mobile", direction: 100 }, // dari kanan
+    { type: "PC Games By WGG", platform: "PC", direction: -100 },
+    { type: "Mobile Games By WGG", platform: "Mobile", direction: 100 },
   ];
 
   return (
-    <section
-      className="relative text-white min-h-screen flex items-center px-6"
-    >
+    <section className="relative text-white min-h-screen flex items-center px-6">
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center w-full">
         {gameSections.map((section, idx) => (
           <motion.div
@@ -49,9 +28,7 @@ export default function GameSection() {
             viewport={{ once: false, amount: 0.2 }}
             className="text-center"
           >
-            <h2 className="text-4xl font-bold text-[#4ECDC4] mb-10">
-              {section.type}
-            </h2>
+            <h2 className="text-4xl font-bold text-[#4ECDC4] mb-10">{section.type}</h2>
 
             <div className="flex justify-center gap-8 mb-10 flex-wrap">
               {gamesByPlatform[section.platform]?.map((game) => (
@@ -61,7 +38,7 @@ export default function GameSection() {
                   className="relative group w-64 h-64 overflow-hidden rounded-xl border-4 border-[#4ECDC4] shadow-lg hover:shadow-[#4ECDC4]/40 transition-shadow"
                 >
                   <img
-                    src={`http://localhost:3000/uploads/${game.img}`}
+                    src={`${import.meta.env.VITE_API_BASE_URL}/uploads/${game.img}`}
                     alt={game.title}
                     className="w-full h-full object-cover transform duration-500 group-hover:scale-110"
                   />

@@ -28,7 +28,7 @@ export default function SubscribeSection() {
       initial={{ opacity: 0, scale: 0.9 }}
       whileInView={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      viewport={{ once: false, amount: 0.3 }} // ⬅️ kuncinya
+      viewport={{ once: false, amount: 0.3 }}
     >
 
         <div className="max-w-2xl mx-auto text-center">

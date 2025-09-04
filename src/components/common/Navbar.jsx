@@ -5,12 +5,10 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 w-full bg-[#292F36] text-[#4ECDC4] text-xl shadow-md z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-        {/* Logo */}
         <div className="font-bold text-[#FF8000]">
           <NavLink to="/">WGG</NavLink>
         </div>
 
-        {/* Nav Links */}
         <ul className="flex gap-6 font-semibold items-center">
           {[
             { name: "Home", path: "/" },
@@ -34,7 +32,6 @@ export default function Navbar() {
         </ul>
       </div>
 
-      {/* Style khusus active link */}
       <style>{`
         .active-link::after {
           content: "";

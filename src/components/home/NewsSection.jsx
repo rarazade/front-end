@@ -1,22 +1,13 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import axios from "axios";
+import useNews from "../../hooks/news/useNews";
 
 export default function NewsSection() {
-  const [news, setNews] = useState([]);
-
-  useEffect(() => {
-    axios
-      .get("http://localhost:3000/api/news")
-      .then((res) => setNews(res.data))
-      .catch((err) => console.error("Failed to fetch news:", err));
-  }, []);
+  const { news } = useNews();
 
   const mainNews = news[0] || {};
   const rightNews = news.slice(1, 6);
 
-  // Variants untuk animasi
   const fadeUpVariant = {
     hidden: { opacity: 0, y: 50 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
@@ -25,7 +16,6 @@ export default function NewsSection() {
   return (
     <section className="relative text-white flex items-center">
       <div className="mx-auto max-w-6xl">
-        {/* Judul */}
         <motion.h2
           className="text-4xl font-extrabold text-[#4ECDC4] text-center tracking-wide"
           initial={{ opacity: 0, scale: 0.8 }}
@@ -52,7 +42,7 @@ export default function NewsSection() {
                 transition={{ duration: 0.3 }}
               >
                 <motion.img
-                  src={`http://localhost:3000/uploads/${mainNews.image}`}
+                  src={`${import.meta.env.VITE_API_BASE_URL}/uploads/${mainNews.image}`}
                   alt={mainNews.title}
                   className="w-full mt-4 h-[420px] object-cover transform group-hover:scale-105 transition duration-500"
                   initial={{ scale: 1.1, opacity: 0 }}
@@ -106,7 +96,7 @@ export default function NewsSection() {
                   className="flex gap-4 items-center bg-[#252B31] shadow hover:bg-[#30383F] transition p-3"
                 >
                   <motion.img
-                    src={`http://localhost:3000/uploads/${item.image}`}
+                    src={`${import.meta.env.VITE_API_BASE_URL}/uploads/${item.image}`}
                     alt={item.title}
                     className="w-20 h-20 object-cover rounded-md"
                     whileHover={{ scale: 1.05 }}

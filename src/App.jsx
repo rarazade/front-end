@@ -1,7 +1,7 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import About from "./pages/About";
-import Games from "./pages/Games/Games";
+import Games from "./pages/Games/SectionGames";
 import GameDetail from "./pages/Games/GameDetail";
 import NewsPage from "./pages/News/NewsPage";
 import NewsDetail from "./pages/News/NewsDetail";

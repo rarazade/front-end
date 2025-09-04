@@ -9,15 +9,12 @@ export const RequirementsDetail = ({requirements}) => {
       <h3 className="text-xl font-bold text-[#4ECDC4] uppercase border-b border-gray-600 pb-2 mb-4">
         System Requirements
       </h3>
-
-      {/* Render PC jika ada */}
       {requirements.PC && (
         <>
           <h3 className="text-x font-bold text-[#4ECDC4] uppercase pb-1 mb-4">
             For PC
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Minimum */}
             <div>
               <h5 className="font-medium uppercase mb-3">Minimum :</h5>
               <ul className="space-y-2 text-gray-300 list-disc list-inside marker:text-[#4ECDC4]">
@@ -31,7 +28,6 @@ export const RequirementsDetail = ({requirements}) => {
               </ul>
             </div>
 
-            {/* Recommended */}
             <div>
               <h5 className="font-medium uppercase mb-3">Direkomendasikan :</h5>
               <ul className="space-y-2 text-gray-300 list-disc list-inside marker:text-[#4ECDC4]">
@@ -48,7 +44,6 @@ export const RequirementsDetail = ({requirements}) => {
         </>
       )}
 
-      {/* Render Mobile jika ada */}
       {requirements.Mobile && (
         <>
           <h3 className="text-x font-bold text-[#4ECDC4] uppercase pb-1 mt-6 mb-4">

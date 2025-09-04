@@ -1,122 +1,71 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { RequirementsDetail } from "./RequirementsDetail";
+import { useGameDetail } from "../../hooks/games/useGames";
 import "../../style.css";
 import background from "../../assets/13.jpg";
+import { getYoutubeEmbedUrl, getYoutubeThumbnail } from "../../utils/youtubeUtils";
+
 
 export default function GameDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState(0); // buat dots
-  const [activeScreenshot, setActiveScreenshot] = useState(0); // buat slider
-  const [game, setGame] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { game, loading, error } = useGameDetail(id);
+  const [activeSection, setActiveSection] = useState(0);
+  const [activeScreenshot, setActiveScreenshot] = useState(0);
   const [activeVideo, setActiveVideo] = useState(0);
-
   const sectionRefs = useRef([]);
 
- const prevSlide = () => {
-  setActiveScreenshot((prev) =>
-    prev === 0 ? game.screenshots.length - 1 : prev - 1
-  );
-};
-
-const nextSlide = () => {
-  setActiveScreenshot((prev) =>
-    prev === game.screenshots.length - 1 ? 0 : prev + 1
-  );
-};
-
-
-  const prevVideo = () => {
-    setActiveVideo((prev) => (prev - 1 + videos.length) % videos.length);
+  const prevSlide = () => {
+    setActiveScreenshot((prev) =>
+      prev === 0 ? game.screenshots.length - 1 : prev - 1
+    );
+  };
+  const nextSlide = () => {
+    setActiveScreenshot((prev) =>
+      prev === game.screenshots.length - 1 ? 0 : prev + 1
+    );
   };
 
-  const nextVideo = () => {
-    setActiveVideo((prev) => (prev + 1) % videos.length);
-  };
+  const videos = game?.videos || [];
+  const prevVideo = () => setActiveVideo((prev) => (prev - 1 + videos.length) % videos.length);
+  const nextVideo = () => setActiveVideo((prev) => (prev + 1) % videos.length);
 
   useEffect(() => {
-    const fetchGame = async () => {
-      try {
-        const res = await fetch(`http://localhost:3000/api/games/${id}`);
-        if (!res.ok) throw new Error("Game not found");
-        const data = await res.json();
-        setGame(data);
-      } catch (error) {
-        console.error("Failed to fetch game:", error);
-        setGame(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchGame();
-  }, [id]);
+    if (!game) return;
 
-  // Scroll observer untuk update dots
-  useEffect(() => {
-    if (!game) return; // Jangan jalan kalau game belum ada
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = sectionRefs.current.indexOf(entry.target);
+            if (idx !== -1) setActiveSection(idx);
+          }
+        });
+      },
+      { threshold: 0.6 }
+    );
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const idx = sectionRefs.current.indexOf(entry.target);
-          if (idx !== -1) setActiveSection(idx);
-        }
-      });
-    },
-    { threshold: 0.6 }
-  );
+    sectionRefs.current
+      .filter((section) => section)
+      .forEach((section) => observer.observe(section));
 
-  // Observe hanya section yang ada
-  sectionRefs.current
-    .filter((section) => section)
-    .forEach((section) => observer.observe(section));
-
-  return () => observer.disconnect();
-}, [game]);
+    return () => observer.disconnect();
+  }, [game]);
 
   if (loading) return <p className="text-white text-center">Loading...</p>;
-  if (!game) return <p className="text-white text-center">Game not found.</p>;
+  if (error || !game) return <p className="text-white text-center">Game not found.</p>;
 
-  const videos = game.videos || [];
-
-  const scrollToSection = (index) => {
-    sectionRefs.current[index]?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  };
-
-  {/* === Helper Function === */}
-const getYoutubeEmbedUrl = (url) => {
-  let videoId = "";
-
-  if (url.includes("watch?v=")) {
-    videoId = url.split("watch?v=")[1].split("&")[0];
-  } else if (url.includes("youtu.be/")) {
-    videoId = url.split("youtu.be/")[1].split("?")[0];
-  } else if (url.includes("embed/")) {
-    videoId = url.split("embed/")[1].split("?")[0];
-  }
-
-  return `https://www.youtube.com/embed/${videoId}`;
-};
 
 return (
   <div className="text-white h-screen overflow-y-scroll snap-y snap-mandatory no-scrollbar relative"
         style={{ backgroundImage: `url(${background})` }}>
-    
-    {/* Background Fixed */}
-    <div 
+        <div 
       className="fixed inset-0 -z-10"
       style={{
         background: "linear-gradient(to bottom, #292F36, #1f2a30, #1f242b, #1f2029, #0f2027)"
       }}
     ></div>
-
-    {/* Navigasi titik modern */}
     <div className="fixed right-6 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-50">
       {sectionRefs.current
         .filter((section) => section)
@@ -155,27 +104,22 @@ return (
       </div>
     </section>
 
-
-    {/* === Section 2 - Videos === */}
+{/* === Section 2 - Videos === */}
 {videos.length > 0 && (
   <section
     ref={(el) => (sectionRefs.current[1] = el)}
     className="relative w-full h-screen snap-start py-12 px-6 md:px-12 flex flex-col md:flex-row gap-10 items-center justify-center bg-black/40"
   >
-    {/* Video Player */}
     <div className="relative flex-1 mt-5 z-10">
       <div className="relative max-w-6xl mx-auto">
         <iframe
-          key={activeVideo}
-          src={getYoutubeEmbedUrl(videos[activeVideo])}
-          title={`youtube-video-${activeVideo}`}
-          className="w-full h-[330px] rounded-xl shadow-lg border border-[#4ECDC4]/30"
-          frameBorder="0"
+          key={videos[activeVideo].id}
+          src={getYoutubeEmbedUrl(videos[activeVideo].url)}
+          title={`video-${videos[activeVideo].id}`}
+          className="w-full aspect-video rounded-lg"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
-        ></iframe>
-
-        {/* Prev/Next Button */}
+        />
         <button 
           onClick={prevVideo} 
           className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-black/50 backdrop-blur-sm text-white p-2 rounded-full hover:bg-black/70 transition"
@@ -189,36 +133,28 @@ return (
           ❯
         </button>
       </div>
-
-      {/* Thumbnails */}
       <div className="justify-center mt-4 flex gap-3 overflow-x-auto pb-2 no-scrollbar">
-        {videos.map((video, idx) => {
-          // ambil videoId dengan helper juga
-          const embedUrl = getYoutubeEmbedUrl(video);
-          const videoId = embedUrl.split("embed/")[1];
-
-          return (
-            <img
-              key={idx}
-              src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
-              alt={`thumb-${idx}`}
-              className={`w-28 h-20 object-cover rounded-lg cursor-pointer border-2 transition ${
-                activeVideo === idx ? "border-[#4ECDC4]" : "border-transparent hover:border-white/30"
-              }`}
-              onClick={() => setActiveVideo(idx)}
-            />
-          );
-        })}
+        {videos.map((video, idx) => (
+          <img
+            key={video.id}
+            src={getYoutubeThumbnail(video.url)}
+            alt={`thumb-${idx}`}
+            className={`w-28 h-20 object-cover rounded-lg cursor-pointer border-2 transition ${
+              activeVideo === idx
+                ? "border-[#4ECDC4]"
+                : "border-transparent hover:border-white/30"
+            }`}
+            onClick={() => setActiveVideo(idx)}
+          />
+        ))}
       </div>
     </div>
-
-    {/* Deskripsi */}
-    <div className="relative flex-1 md:pl-5 z-10">
-      <h2 className="text-3xl font-bold mb-6 text-[#4ECDC4] uppercase tracking-wide">About This Game</h2>
-      <p className="text-gray-200 leading-relaxed text-lg">{game.description}</p>
-    </div>
-  </section>
-)}
+        <div className="relative flex-1 md:pl-5 z-10">
+          <h2 className="text-3xl font-bold mb-6 text-[#4ECDC4] uppercase tracking-wide">About This Game</h2>
+          <p className="text-gray-200 leading-relaxed text-lg">{game.description}</p>
+        </div>
+      </section>
+    )}
 
 
 {/* Section 3 - Screenshots */}
@@ -228,7 +164,6 @@ return (
     className="relative w-full h-screen snap-start py-16 flex flex-col md:flex-row gap-8 items-center justify-center px-7 bg-black/40"
   >
   <div className="relative w-full h-full z-10">
-      {/* Carousel Screenshot */}
       <div className="max-w-6xl mx-auto space-y-10">
         <h3 className="mt-6 text-3xl font-bold text-center text-[#4ECDC4] uppercase mb-10">Screenshots</h3>
         <div className="relative flex justify-center items-center h-[300px] sm:h-[400px] overflow-hidden max-w-full">
