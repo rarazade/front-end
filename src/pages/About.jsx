@@ -98,7 +98,10 @@ export default function AboutPage() {
     >
       <div className="relative w-1/2 pr-10 text-right">
         <h2 className="text-2xl font-bold mb-2">Our Vision</h2>
-        <p className="text-gray-600 leading-relaxed">{about.vision}</p>
+        <div
+          className="text-gray-600 leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: about.vision }}
+        ></div>
         <span className="absolute top-2 right-[-18px] w-6 h-6 bg-teal-400 rounded-full shadow-lg"></span>
       </div>
     </motion.div>
@@ -112,8 +115,10 @@ export default function AboutPage() {
     >
       <div className="relative w-1/2 pl-10 text-left">
         <h2 className="text-2xl font-bold mb-2">Our Mission</h2>
-        <p className="text-gray-600 leading-relaxed">{about.mission}</p>
-        {/* Dot */}
+        <div
+          className="text-gray-600 leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: about.mission }}
+        ></div>
         <span className="absolute top-2 left-[-18px] w-6 h-6 bg-pink-400 rounded-full shadow-lg"></span>
       </div>
     </motion.div>
