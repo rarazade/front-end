@@ -1,47 +1,46 @@
-import { useState } from "react";
+import { useState, useCallback, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import background from "../../assets/bg2.jpg";
 
-export default function SubscribeSection() {
+function SubscribeSection() {
   const [email, setEmail] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    (e) => {
+      e.preventDefault();
 
-    if (!email) return;
+      if (!email) return;
 
-    console.log("Email subscribed:", email);
+      console.log("Email subscribed:", email);
 
-    setIsSuccess(true);
-    setEmail("");
+      setIsSuccess(true);
+      setEmail("");
 
-    setTimeout(() => setIsSuccess(false), 3000);
-  };
+      setTimeout(() => setIsSuccess(false), 3000);
+    },
+    [email]
+  );
 
   return (
-    <section
-      className="relative text-white flex justify-center items-center"
-    >
+    <section className="relative text-white flex justify-center items-center">
       <motion.div
-      className="bg-[#292F36]/70 p-20 rounded-xl"
-      initial={{ opacity: 0, scale: 0.9 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      viewport={{ once: false, amount: 0.3 }}
-    >
-
+        className="bg-[#292F36]/70 p-20 rounded-xl"
+        initial={{ opacity: 0, scale: 0.9 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        viewport={{ once: false, amount: 0.3 }}
+      >
         <div className="max-w-2xl mx-auto text-center">
           <motion.h2
-          className="text-4xl font-extrabold text-[#4ECDC4]"
-          initial={{ opacity: 0, y: -30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: false, amount: 0.2 }}
-        >
-          Let’s Subscribe!
-        </motion.h2>
-
+            className="text-4xl font-extrabold text-[#4ECDC4]"
+            initial={{ opacity: 0, y: -30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: false, amount: 0.2 }}
+          >
+            Let’s Subscribe!
+          </motion.h2>
 
           <motion.p
             className="text-lg text-gray-300 leading-relaxed"
@@ -54,7 +53,8 @@ export default function SubscribeSection() {
             Sign up for our newsletter and never miss an update. See our{" "}
             <a href="#" className="underline hover:text-orange-300">
               Privacy Policy
-            </a>.
+            </a>
+            .
           </motion.p>
 
           <motion.form
@@ -73,7 +73,6 @@ export default function SubscribeSection() {
               className="px-4 py-3 w-full sm:w-80 text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]"
               required
               whileFocus={{ scale: 1.02 }}
-              
             />
             <motion.button
               type="submit"
@@ -103,3 +102,5 @@ export default function SubscribeSection() {
     </section>
   );
 }
+
+export default memo(SubscribeSection);

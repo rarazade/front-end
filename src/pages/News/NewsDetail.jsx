@@ -1,6 +1,28 @@
 import { useParams, Link } from "react-router-dom";
+import { useMemo } from "react";
 import Navbar from "../../components/common/Navbar";
 import useNewsDetail from "../../hooks/news/usenewsDetail";
+import React from "react";
+
+const LatestNewsItem = React.memo(function LatestNewsItem({ news }) {
+  return (
+    <Link to={`/news/${news.id}`} key={news.id}>
+      <div className="mb-6 border-b border-black pb-3 hover:text-[#FF8000] transition flex gap-4 items-start">
+        <img
+          src={`${import.meta.env.VITE_API_BASE_URL}/uploads/${news.image}`}
+          alt={news.title}
+          className="w-16 h-16 object-cover rounded"
+        />
+        <div>
+          <p className="text-md font-medium">{news.title}</p>
+          <p className="text-sm text-gray-800 mt-1">
+            {(news.date || news.createdAt || "").slice(0, 10)}
+          </p>
+        </div>
+      </div>
+    </Link>
+  );
+});
 
 export default function NewsDetail() {
   const { id } = useParams();
@@ -28,34 +50,21 @@ export default function NewsDetail() {
     );
   }
 
+  const latestNewsElements = useMemo(
+    () => latestNews.map((news) => <LatestNewsItem key={news.id} news={news} />),
+    [latestNews]
+  );
+
   return (
     <>
       <Navbar />
       <div className="bg-stone-100 text-black">
         <div className="max-w-7xl mx-auto px-6 py-16 md:flex gap-8">
-          {/* LEFT SIDEBAR */}
           <div className="md:w-1/4 mt-7">
             <h3 className="text-lg font-bold text-[#FF8000] mb-4">LATEST NEWS</h3>
-            {latestNews.map((news) => (
-              <Link to={`/news/${news.id}`} key={news.id}>
-                <div className="mb-6 border-b border-black pb-3 hover:text-[#FF8000] transition flex gap-4 items-start">
-                  <img
-                    src={`${import.meta.env.VITE_API_BASE_URL}/uploads/${news.image}`}
-                    alt={news.title}
-                    className="w-16 h-16 object-cover rounded"
-                  />
-                  <div>
-                    <p className="text-md font-medium">{news.title}</p>
-                    <p className="text-sm text-gray-800 mt-1">
-                      {(news.date || news.createdAt || "").slice(0, 10)}
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            ))}
+            {latestNewsElements}
           </div>
 
-          {/* RIGHT CONTENT */}
           <div className="md:w-2/3 mt-5">
             <h2 className="text-4xl font-bold mb-2">{newsItem.title}</h2>
             <div className="flex flex-row">

@@ -1,7 +1,7 @@
-import { Link } from "react-router-dom";
+import React from "react";
 import { NavLink } from "react-router-dom";
 
-export default function Navbar() {
+function Navbar() {
   return (
     <nav className="fixed top-0 w-full bg-[#292F36] text-[#4ECDC4] text-xl shadow-md z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -46,3 +46,5 @@ export default function Navbar() {
     </nav>
   );
 }
+
+export default React.memo(Navbar);

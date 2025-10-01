@@ -1,20 +1,24 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useGames } from "../../hooks/games/useGames";
-import background from "../../assets/bg2.jpg";
+import React, { useMemo } from "react";
 
-export default function GameSection() {
+function GameSection() {
   const { games } = useGames();
+  const gamesByPlatform = useMemo(() => {
+    return {
+      PC: games.filter((g) => g.platforms[0] === "PC").slice(0, 2),
+      Mobile: games.filter((g) => g.platforms[0] === "Mobile").slice(0, 2),
+    };
+  }, [games]);
 
-  const gamesByPlatform = {
-    PC: games.filter((g) => g.platforms[0] === "PC").slice(0, 2),
-    Mobile: games.filter((g) => g.platforms[0] === "Mobile").slice(0, 2),
-  };
-
-  const gameSections = [
-    { type: "PC Games By WGG", platform: "PC", direction: -100 },
-    { type: "Mobile Games By WGG", platform: "Mobile", direction: 100 },
-  ];
+  const gameSections = useMemo(
+    () => [
+      { type: "PC Games By WGG", platform: "PC", direction: -100 },
+      { type: "Mobile Games By WGG", platform: "Mobile", direction: 100 },
+    ],
+    []
+  );
 
   return (
     <section className="relative text-white min-h-screen flex items-center px-6">
@@ -28,7 +32,9 @@ export default function GameSection() {
             viewport={{ once: false, amount: 0.2 }}
             className="text-center"
           >
-            <h2 className="text-4xl font-bold text-[#4ECDC4] mb-10">{section.type}</h2>
+            <h2 className="text-4xl font-bold text-[#4ECDC4] mb-10">
+              {section.type}
+            </h2>
 
             <div className="flex justify-center gap-8 mb-10 flex-wrap">
               {gamesByPlatform[section.platform]?.map((game) => (
@@ -60,3 +66,5 @@ export default function GameSection() {
     </section>
   );
 }
+
+export default React.memo(GameSection);

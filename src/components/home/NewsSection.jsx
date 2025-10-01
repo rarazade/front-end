@@ -1,17 +1,25 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import useNews from "../../hooks/news/useNews";
+import React, { useMemo } from "react";
 
-export default function NewsSection() {
+function NewsSection() {
   const { news } = useNews();
 
-  const mainNews = news[0] || {};
-  const rightNews = news.slice(1, 6);
+  const mainNews = useMemo(() => news[0] || {}, [news]);
+  const rightNews = useMemo(() => news.slice(1, 6), [news]);
 
-  const fadeUpVariant = {
-    hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
-  };
+  const fadeUpVariant = useMemo(
+    () => ({
+      hidden: { opacity: 0, y: 50 },
+      visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.6, ease: "easeOut" },
+      },
+    }),
+    []
+  );
 
   return (
     <section className="relative text-white flex items-center">
@@ -60,7 +68,9 @@ export default function NewsSection() {
                   <h3 className="text-3xl font-bold drop-shadow-md">
                     {mainNews.title}
                   </h3>
-                  <p className="text-sm text-gray-300 mt-2">{mainNews.excerpt}</p>
+                  <p className="text-sm text-gray-300 mt-2">
+                    {mainNews.excerpt}
+                  </p>
                   <Link
                     to={`/news/${mainNews.id}`}
                     className="inline-block mt-4 bg-[#4ECDC4] text-black font-semibold px-5 py-2 rounded-lg hover:bg-[#3bb3aa] transition"
@@ -118,3 +128,5 @@ export default function NewsSection() {
     </section>
   );
 }
+
+export default React.memo(NewsSection);

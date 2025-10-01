@@ -1,19 +1,58 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import useNews from "../../hooks/news/useNews";
+import React from "react";
+
+const NewsCard = React.memo(function NewsCard({ item, idx, scrollToTop }) {
+  return (
+    <motion.div
+      key={item.id}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: idx * 0.15 }}
+      viewport={{ once: false, amount: 0.2 }}
+      className="overflow-hidden shadow-xl flex flex-col text-black bg-orange-100/70 border-2 backdrop-blur-md group"
+    >
+      <div className="h-56 w-full overflow-hidden">
+        <img
+          src={`${import.meta.env.VITE_API_BASE_URL}/uploads/${item.image}`}
+          alt={item.title}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        />
+      </div>
+      <div className="p-5 flex flex-col flex-grow">
+        <h3 className="text-2xl font-bold mb-1">{item.title}</h3>
+        <p className="text-sm text-black">
+          {item.source || "WGG Studio"}{" "}
+          <span className="text-gray-700 ml-2">
+            {item.createdAt ? item.createdAt.slice(0, 10) : ""}
+          </span>
+        </p>
+        <p className="text-sm text-gray-900 mt-3 flex-grow">{item.excerpt}</p>
+        <Link
+          to={`/news/${item.id}`}
+          className="mt-4 text-black font-semibold hover:text-[#4ECDC4] transition"
+          onClick={scrollToTop}
+        >
+          Read More →
+        </Link>
+      </div>
+    </motion.div>
+  );
+});
 
 export default function NewsPage() {
   const { news, loading } = useNews();
   const [visibleItems, setVisibleItems] = useState(4);
 
-  const handleLoadMore = () => {
+  const handleLoadMore = useCallback(() => {
     setVisibleItems((prev) => prev + 4);
-  };
+  }, []);
 
-  const scrollToTop = () => {
+  const scrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  }, []);
 
   if (loading) {
     return (
@@ -31,10 +70,16 @@ export default function NewsPage() {
     );
   }
 
+  const newsList = useMemo(
+    () =>
+      news.slice(1, visibleItems + 1).map((item, idx) => (
+        <NewsCard key={item.id} item={item} idx={idx} scrollToTop={scrollToTop} />
+      )),
+    [news, visibleItems, scrollToTop]
+  );
+
   return (
-    <section
-      className="bg-orange-100 relative py-16 px-9 min-h-screen bg-no-repeat bg-cover bg-center"
-    >
+    <section className="bg-orange-100 relative py-16 px-9 min-h-screen bg-no-repeat bg-cover bg-center">
       <div className="max-w-6xl mx-auto">
         <motion.h2
           initial={{ opacity: 0, y: 30 }}
@@ -46,7 +91,6 @@ export default function NewsPage() {
           Latest News
         </motion.h2>
 
-        {/* Berita utama */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -86,48 +130,8 @@ export default function NewsPage() {
           </motion.div>
         </motion.div>
 
-        {/* List berita lainnya */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {news.slice(1, visibleItems + 1).map((item, idx) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: idx * 0.15 }}
-              viewport={{ once: false, amount: 0.2 }}
-              className="overflow-hidden shadow-xl flex flex-col text-black bg-orange-100/70 border-2 backdrop-blur-md group"
-            >
-              <div className="h-56 w-full overflow-hidden">
-                <img
-                  src={`${import.meta.env.VITE_API_BASE_URL}/uploads/${item.image}`}
-                  alt={item.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-              </div>
-              <div className="p-5 flex flex-col flex-grow">
-                <h3 className="text-2xl font-bold mb-1">{item.title}</h3>
-                <p className="text-sm text-black">
-                  {item.source || "WGG Studio"}{" "}
-                  <span className="text-gray-700 ml-2">
-                    {item.createdAt ? item.createdAt.slice(0, 10) : ""}
-                  </span>
-                </p>
-                <p className="text-sm text-gray-900 mt-3 flex-grow">
-                  {item.excerpt}
-                </p>
-                <Link
-                  to={`/news/${item.id}`}
-                  className="mt-4 text-black font-semibold hover:text-[#4ECDC4] transition"
-                  onClick={scrollToTop}
-                >
-                  Read More →
-                </Link>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">{newsList}</div>
 
-        {/* Tombol Load More */}
         {visibleItems + 1 < news.length && (
           <div className="mt-16 flex justify-center">
             <button
