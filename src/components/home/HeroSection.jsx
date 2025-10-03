@@ -1,7 +1,6 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useJumbotrons } from "../../hooks/games/useGames";
-import React from "react";
 
 function HeroSection() {
   const { jumbotrons } = useJumbotrons();
@@ -25,6 +24,11 @@ function HeroSection() {
     return () => clearTimeout(timer);
   }, [currentIndex]);
 
+  const current = useMemo(
+    () => jumbotrons[currentIndex],
+    [jumbotrons, currentIndex]
+  );
+
   if (jumbotrons.length === 0) {
     return (
       <section className="w-full h-[70vh] flex items-center justify-center text-white">
@@ -32,11 +36,6 @@ function HeroSection() {
       </section>
     );
   }
-
-  const current = useMemo(
-    () => jumbotrons[currentIndex],
-    [jumbotrons, currentIndex]
-  );
 
   return (
     <section className="relative w-full bg-[#0a1016] h-[100vh] overflow-hidden">
@@ -48,18 +47,14 @@ function HeroSection() {
       <div className="relative h-full flex flex-col items-start justify-center text-left md:pl-20 text-white bg-gradient-to-r from-black/60 via-black/40 to-transparent">
         <h2
           className={`text-4xl md:text-5xl font-bold mb-4 text-[#4ECDC4] transform transition-all duration-500 ease-out ${
-            animate
-              ? "opacity-0 -translate-x-10"
-              : "opacity-100 translate-x-0"
+            animate ? "opacity-0 -translate-x-10" : "opacity-100 translate-x-0"
           }`}
         >
           {current.game.title}
         </h2>
         <p
           className={`max-w-2xl text-gray-200 text-lg line-clamp-3 transform transition-all duration-500 delay-100 ease-out ${
-            animate
-              ? "opacity-0 -translate-x-10"
-              : "opacity-100 translate-x-0"
+            animate ? "opacity-0 -translate-x-10" : "opacity-100 translate-x-0"
           }`}
         >
           {current.game.description}
@@ -67,9 +62,7 @@ function HeroSection() {
         <Link
           to={`/games/${current.game.id}`}
           className={`text-[#4ECDC4] font-semibold py-2 rounded-lg mt-2 flex items-center gap-2 transform transition-all duration-500 delay-200 ease-out ${
-            animate
-              ? "opacity-0 -translate-x-10"
-              : "opacity-100 translate-x-0"
+            animate ? "opacity-0 -translate-x-10" : "opacity-100 translate-x-0"
           }`}
         >
           READ MORE →

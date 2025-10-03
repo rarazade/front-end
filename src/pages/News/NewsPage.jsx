@@ -54,29 +54,41 @@ export default function NewsPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
+  // taruh di sini (selalu dipanggil, walau news kosong / loading)
+  const newsList = useMemo(() => {
+    if (!news || news.length === 0) return [];
+    return news
+      .slice(1, visibleItems + 1)
+      .map((item, idx) => (
+        <NewsCard
+          key={item.id}
+          item={item}
+          idx={idx}
+          scrollToTop={scrollToTop}
+        />
+      ));
+  }, [news, visibleItems, scrollToTop]);
+
   if (loading) {
     return (
       <section className="bg-white text-black py-16 px-6">
-        <div className="max-w-6xl mx-auto text-center text-lg">Loading news...</div>
+        <div className="max-w-6xl mx-auto text-center text-lg">
+          Loading news...
+        </div>
       </section>
     );
   }
 
-  if (news.length === 0) {
+  if (!news || news.length === 0) {
     return (
       <section className="bg-white text-black py-16 px-6">
-        <div className="max-w-6xl mx-auto text-center text-lg">No news available.</div>
+        <div className="max-w-6xl mx-auto text-center text-lg">
+          No news available.
+        </div>
       </section>
     );
   }
 
-  const newsList = useMemo(
-    () =>
-      news.slice(1, visibleItems + 1).map((item, idx) => (
-        <NewsCard key={item.id} item={item} idx={idx} scrollToTop={scrollToTop} />
-      )),
-    [news, visibleItems, scrollToTop]
-  );
 
   return (
     <section className="bg-orange-100 relative py-16 px-9 min-h-screen bg-no-repeat bg-cover bg-center">
